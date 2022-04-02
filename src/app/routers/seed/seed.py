@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.utils import selectors
 from src.utils.fetch_seed_data import get_seed_data_by_recency
@@ -21,7 +21,10 @@ async def sorted_seeds(tier: int, level: int, offset_weeks: Optional[int] = 0):
         (selectors.raid_level, lambda x: x == level),
     )
 
-    return selectors.select_first_by(
+    payload = selectors.select_first_by(
         data=seed_data,
         selectors_and_validators=selectors_and_validators,
     )
+
+    if payload is None:
+        raise HTTPException(status_code=400, detail=f"No raid seed found for raid level {tier}-{level}")

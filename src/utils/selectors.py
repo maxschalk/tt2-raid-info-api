@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 
-import src.utils.titan_anatomy as titan_anatomy
+import src.models.titan_anatomy as titan_anatomy
 from src.utils.safe_parse import safe_parse_datetime, safe_parse_float, safe_parse_int
 
 
@@ -126,7 +126,7 @@ def titan_part_by_name(titan_info, part_id) -> Optional[Dict]:
 
 
 def titan_subparts_by_object(titan_info, part_object, prefix=titan_anatomy.BODY_PREFIX) -> Tuple[Optional[Dict]]:
-    if part_object not in titan_anatomy.ALL_TITAN_PARTS:
+    if part_object not in titan_anatomy.TITAN_PARTS_ALL:
         raise ValueError("Incorrect part object provided")
 
     if isinstance(part_object, str):

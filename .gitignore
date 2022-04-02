@@ -1,2 +1,4 @@
 **/.idea
 **/venv
+
+src/raid_seed_data/*
