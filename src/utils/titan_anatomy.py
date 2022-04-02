@@ -1,0 +1,67 @@
+ARMOR_PREFIX = "Armor"
+BODY_PREFIX = "Body"
+
+PART_HEAD = "Head"
+PART_TORSO = "ChestUpper"
+PART_SHOULDER_RIGHT = "ArmUpperRight"
+PART_SHOULDER_LEFT = "ArmUpperLeft"
+PART_HAND_RIGHT = "HandRight"
+PART_HAND_LEFT = "HandLeft"
+PART_LEG_RIGHT = "LegUpperRight"
+PART_LEG_LEFT = "LegUpperLeft"
+
+PARTS_ARM_RIGHT = (PART_SHOULDER_RIGHT, PART_SHOULDER_RIGHT)
+PARTS_ARM_LEFT = (PART_SHOULDER_LEFT, PART_SHOULDER_LEFT)
+
+PARTS_ARMS = (*PARTS_ARM_RIGHT, *PARTS_ARM_LEFT)
+
+PARTS_LEGS = (PART_LEG_RIGHT, PART_LEG_LEFT)
+
+ATOMIC_TITAN_PARTS = (
+    PART_HEAD,
+    PART_TORSO,
+    PART_SHOULDER_RIGHT,
+    PART_SHOULDER_LEFT,
+    PART_HAND_RIGHT,
+    PART_HAND_LEFT,
+    PART_LEG_RIGHT,
+    PART_LEG_LEFT,
+)
+
+CONSOLIDATED_TITAN_PARTS = (
+    PART_HEAD,
+    PART_TORSO,
+    PARTS_ARMS,
+    PARTS_LEGS,
+)
+
+ALL_TITAN_PARTS = (
+    *ATOMIC_TITAN_PARTS,
+    *CONSOLIDATED_TITAN_PARTS
+)
+
+TITAN_PART_REPRS = {
+    PART_HEAD: "Head",
+    PART_TORSO: "Torso",
+    PART_SHOULDER_RIGHT: "Right Shoulder",
+    PART_SHOULDER_LEFT: "Left Shoulder",
+    PART_HAND_RIGHT: "Right Hand",
+    PART_HAND_LEFT: "Left Hand",
+    PART_LEG_RIGHT: "Right Leg",
+    PART_LEG_LEFT: "Left Leg",
+
+    PARTS_ARM_RIGHT: "Right Arm",
+    PARTS_ARM_LEFT: "Left Arm",
+
+    PARTS_ARMS: "Arms",
+
+    PARTS_LEGS: "Legs"
+}
+
+TITAN_ANATOMY = {
+    titan_part: {
+        "armor": f"{ARMOR_PREFIX}{titan_part}",
+        "body": f"{BODY_PREFIX}{titan_part}"
+    }
+    for titan_part in ATOMIC_TITAN_PARTS
+}
