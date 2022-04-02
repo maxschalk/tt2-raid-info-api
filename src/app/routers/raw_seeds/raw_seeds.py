@@ -5,7 +5,6 @@ from fastapi import APIRouter
 from src.utils.fetch_seed_data import (
     SortOrder,
     get_sorted_seed_data,
-    get_most_recent_seed_data,
     get_seed_data_by_recency
 )
 
@@ -22,10 +21,5 @@ async def sorted_seeds(sort_order: Optional[SortOrder] = SortOrder.DESCENDING):
 
 
 @router.get("/seed")
-async def most_recent_seed():
-    return get_most_recent_seed_data()
-
-
-@router.get("/seed/{offset_week}")
-async def seed_by_recency(offset_week: int):
-    return get_seed_data_by_recency(offset=offset_week)
+async def seed_by_recency(offset_weeks: Optional[int] = 0):
+    return get_seed_data_by_recency(offset=offset_weeks)

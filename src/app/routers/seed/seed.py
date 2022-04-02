@@ -1,7 +1,9 @@
+from typing import Optional
+
 from fastapi import APIRouter
 
 from src.utils import selectors
-from src.utils.fetch_seed_data import get_most_recent_seed_data
+from src.utils.fetch_seed_data import get_seed_data_by_recency
 
 router = APIRouter(
     prefix="/seed",
@@ -11,8 +13,8 @@ router = APIRouter(
 
 
 @router.get("/{tier}/{level}")
-async def sorted_seeds(tier: int, level: int):
-    seed_data = get_most_recent_seed_data()
+async def sorted_seeds(tier: int, level: int, offset_weeks: Optional[int] = 0):
+    seed_data = get_seed_data_by_recency(offset=offset_weeks)
 
     selectors_and_validators = (
         (selectors.raid_tier, lambda x: x == tier),
