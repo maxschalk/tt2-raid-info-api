@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 from fastapi import APIRouter, HTTPException
 
 from src.models.raid_data import RaidSeedData
-from src.utils.fetch_seed_data import (
+from src.utils.seed_data_fs_interface import (
     SortOrder,
     get_sorted_seed_data,
     get_seed_data_by_recency

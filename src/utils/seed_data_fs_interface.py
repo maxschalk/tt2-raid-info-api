@@ -3,12 +3,12 @@ import os.path
 from enum import Enum
 from os import listdir
 from os.path import isfile, join
-from typing import Tuple, Optional, Iterator
+from typing import Tuple, Optional, Iterator, List
+
+from fastapi.encoders import jsonable_encoder
 
 from src.PATHS import DATA_DIR
 from src.models.raid_data import RaidSeedData
-
-_JSON_DATA_TYPES = str | int | float | dict | list | bool | None
 
 
 class SortOrder(Enum):
@@ -46,6 +46,21 @@ def _load_seed_data(*, filepath: str) -> RaidSeedData:
 
     with open(filepath, 'r') as file:
         return json.load(file)
+
+
+def _dump_seed_data(*, filename: str, data: List[RaidSeedData]) -> bool:
+    if not filename.endswith(".json"):
+        filename = f"{filename}.json"
+
+    filepath = join(DATA_DIR, filename)
+
+    if os.path.exists(filepath):
+        return False
+
+    with open(filepath, 'w') as file:
+        json.dump(jsonable_encoder(data), file)
+
+    return True
 
 
 def get_all_seed_data() -> tuple[RaidSeedData]:

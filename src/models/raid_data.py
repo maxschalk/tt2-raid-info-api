@@ -1,10 +1,30 @@
-from __future__ import annotations
-
 from typing import List
 
 from pydantic import BaseModel
 
 from src.models.titan_anatomy import TitanAnatomy
+
+
+class Buff(BaseModel):
+    bonus_type: str
+    bonus_amount: float
+
+
+class Titan(BaseModel):
+    enemy_id: str
+    enemy_name: str
+
+    total_hp: float
+    parts: List
+
+    area_debuffs: List[Buff] = None
+    cursed_debuffs: List[Buff] = None
+
+
+class TitanPart(BaseModel):
+    part_id: TitanAnatomy
+    total_hp: float
+    cursed: bool
 
 
 class RaidSeedData(BaseModel):
@@ -18,29 +38,7 @@ class RaidSeedData(BaseModel):
 
     titans: List[Titan]
 
-    area_buffs: List[Buff]
-
-
-class Titan(BaseModel):
-    enemy_id: str
-    enemy_name: str
-
-    total_hp: float
-    parts: List
-
-    area_debuffs: List[Buff]
-    cursed_debuffs: List[Buff]
-
-
-class TitanPart(BaseModel):
-    part_id: TitanAnatomy
-    total_hp: float
-    cursed: bool
-
-
-class Buff(BaseModel):
-    bonus_type: str
-    bonus_amount: float
+    area_buffs: List[Buff] = None
 
 
 # SAMPLE

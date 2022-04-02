@@ -1,9 +1,16 @@
-from typing import Optional
+import os
+from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException
+from dotenv import load_dotenv
+from fastapi import APIRouter, HTTPException, Response, Header
 
+from src.models.raid_data import RaidSeedData
 from src.utils import selectors
-from src.utils.fetch_seed_data import get_seed_data_by_recency
+from src.utils.seed_data_fs_interface import get_seed_data_by_recency, _dump_seed_data
+
+load_dotenv()
+
+ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
 
 router = APIRouter(
     prefix="/seed",
@@ -13,7 +20,7 @@ router = APIRouter(
 
 
 @router.get("/{tier}/{level}")
-async def sorted_seeds(tier: int, level: int, offset_weeks: Optional[int] = 0):
+async def selected_seed(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidSeedData:
     seed_data = get_seed_data_by_recency(offset=offset_weeks)
 
     selectors_and_validators = (
@@ -28,3 +35,30 @@ async def sorted_seeds(tier: int, level: int, offset_weeks: Optional[int] = 0):
 
     if payload is None:
         raise HTTPException(status_code=400, detail=f"No raid seed found for raid level {tier}-{level}")
+
+    return payload
+
+
+@router.post("/{filename}")
+async def sorted_seeds(filename: str, data: List[RaidSeedData], auth_secret: Optional[str] = Header(None)):
+    if not auth_secret or auth_secret != ENV_AUTH_SECRET:
+        raise HTTPException(
+            status_code=401,
+            detail=f"You are not authorized to make this request."
+        )
+
+    try:
+        result = _dump_seed_data(filename=filename, data=data)
+    except IndexError:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Something went wrong when interfacing with the filesystem."
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File {filename} already exists on the server."
+        )
+
+    return Response(content="Success")
