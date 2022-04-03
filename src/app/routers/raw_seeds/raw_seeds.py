@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 from fastapi import APIRouter, HTTPException
 
-from src.models.raid_data import RaidSeedData
+from src.models.raid_data import RaidRawSeedData
 from src.utils.SortOrder import SortOrder
 from src.utils.seed_data_fs_interface import (
     get_sorted_seed_data,
@@ -17,12 +17,12 @@ router = APIRouter(
 
 
 @router.get("/all_seeds")
-async def sorted_seeds(sort_order: Optional[SortOrder] = SortOrder.DESCENDING) -> Tuple[RaidSeedData]:
+async def sorted_seeds(sort_order: Optional[SortOrder] = SortOrder.DESCENDING) -> Tuple[RaidRawSeedData]:
     return get_sorted_seed_data(sort_order=sort_order)
 
 
 @router.get("/most_recent")
-async def seed_by_recency(offset_weeks: Optional[int] = 0) -> RaidSeedData:
+async def seed_by_recency(offset_weeks: Optional[int] = 0) -> RaidRawSeedData:
     payload = get_seed_data_by_recency(offset=offset_weeks)
 
     if payload is None:

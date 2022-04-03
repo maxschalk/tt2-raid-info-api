@@ -8,6 +8,7 @@ from src.models.titan_anatomy import TitanAnatomy
 class RaidDataFile(BaseModel):
     filename: str
 
+
 class Buff(BaseModel):
     bonus_type: str
     bonus_amount: float
@@ -30,7 +31,7 @@ class TitanPart(BaseModel):
     cursed: bool
 
 
-class RaidSeedData(BaseModel):
+class RaidRawSeedData(BaseModel):
     spawn_sequence: List[str]
 
     raid_info_valid_from: str
@@ -42,6 +43,20 @@ class RaidSeedData(BaseModel):
     titans: List[Titan]
 
     area_buffs: List[Buff] = None
+
+# TODO
+class EnhancedTitan(Titan):
+    total_armor_hp: int | float
+    total_armor_hp: int | float
+
+    skippable_hp: int | float
+
+    cursed_parts: List[TitanPart]
+    number_of_cursed_parts: int
+
+
+class RaidEnhancedSeedData(RaidRawSeedData):
+    total_target_hp: int | float
 
 
 # SAMPLE

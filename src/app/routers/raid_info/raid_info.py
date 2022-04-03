@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
-from src.models.raid_data import RaidSeedData
+from src.models.raid_data import RaidRawSeedData
 from src.utils import selectors
 from src.utils.seed_data_fs_interface import get_seed_data_by_recency
 
@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get("/{tier}/{level}")
-async def raid_info_by_tier_level(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidSeedData:
+async def raid_info_by_tier_level(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidRawSeedData:
     seed_data = get_seed_data_by_recency(offset=offset_weeks)
 
     selectors_and_validators = (

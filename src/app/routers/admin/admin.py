@@ -4,7 +4,7 @@ from typing import Optional, List, Tuple, Dict
 from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException
 
-from src.models.raid_data import RaidSeedData, RaidDataFile
+from src.models.raid_data import RaidRawSeedData, RaidDataFile
 from src.utils.SortOrder import SortOrder
 from src.utils.seed_data_fs_interface import (
     dump_seed_data,
@@ -44,7 +44,7 @@ async def sorted_seeds(
 async def sorted_seeds(
         *,
         file: RaidDataFile,
-        data: List[RaidSeedData],
+        data: List[RaidRawSeedData],
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)
