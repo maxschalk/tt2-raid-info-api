@@ -7,7 +7,7 @@ from typing import Tuple, Optional, Iterator, List
 
 from fastapi.encoders import jsonable_encoder
 
-from src.PATHS import DATA_DIR
+from src.PATHS import RAW_SEEDS_DIR
 from src.models.raid_data import RaidSeedData
 
 
@@ -17,8 +17,8 @@ class SortOrder(Enum):
 
 
 def _seed_path_generator() -> Iterator[str]:
-    for filepath in listdir(DATA_DIR):
-        if isfile(join(DATA_DIR, filepath)):
+    for filepath in listdir(RAW_SEEDS_DIR):
+        if isfile(join(RAW_SEEDS_DIR, filepath)):
             yield filepath
 
 
@@ -42,7 +42,7 @@ def _get_sorted_seed_paths(*, sort_order: SortOrder = SortOrder.ASCENDING) -> Tu
 
 def _load_seed_data(*, filepath: str) -> RaidSeedData:
     if not os.path.isabs(filepath):
-        filepath = join(DATA_DIR, filepath)
+        filepath = join(RAW_SEEDS_DIR, filepath)
 
     with open(filepath, 'r') as file:
         return json.load(file)
@@ -52,7 +52,7 @@ def _dump_seed_data(*, filename: str, data: List[RaidSeedData]) -> bool:
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
-    filepath = join(DATA_DIR, filename)
+    filepath = join(RAW_SEEDS_DIR, filename)
 
     if os.path.exists(filepath):
         return False

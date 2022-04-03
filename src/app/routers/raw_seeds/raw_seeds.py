@@ -1,13 +1,20 @@
-from typing import Optional, Tuple
+import os
+from typing import Optional, Tuple, List
 
-from fastapi import APIRouter, HTTPException
+from dotenv import load_dotenv
+from fastapi import APIRouter, Header, Response, HTTPException
 
 from src.models.raid_data import RaidSeedData
 from src.utils.seed_data_fs_interface import (
     SortOrder,
     get_sorted_seed_data,
-    get_seed_data_by_recency
+    get_seed_data_by_recency,
+    _dump_seed_data
 )
+
+load_dotenv()
+
+ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
 
 router = APIRouter(
     prefix="/raw_seeds",
@@ -29,3 +36,28 @@ async def seed_by_recency(offset_weeks: Optional[int] = 0) -> RaidSeedData:
         raise HTTPException(status_code=400, detail="Offset too large")
 
     return payload
+
+
+@router.post("/{filename}")
+async def sorted_seeds(filename: str, data: List[RaidSeedData], secret: Optional[str] = Header(None)):
+    if not secret or secret != ENV_AUTH_SECRET:
+        raise HTTPException(
+            status_code=401,
+            detail=f"You are not authorized to make this request."
+        )
+
+    try:
+        result = _dump_seed_data(filename=filename, data=data)
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Something went wrong when interfacing with the filesystem."
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File {filename} already exists on the server."
+        )
+
+    return Response(content="Success")

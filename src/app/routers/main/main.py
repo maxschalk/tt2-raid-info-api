@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from ...routers import raw_seeds, seed
+from ...routers import raw_seeds, raid_info
 
 router = APIRouter(
     prefix="/api/v0",
@@ -10,7 +10,7 @@ router = APIRouter(
 
 router.include_router(raw_seeds.router)
 
-router.include_router(seed.router)
+router.include_router(raid_info.router)
 
 
 @router.get("/")
