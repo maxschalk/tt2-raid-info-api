@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from src.models.titan_anatomy import TitanAnatomy
 
 
+class RaidDataFile(BaseModel):
+    filename: str
+
 class Buff(BaseModel):
     bonus_type: str
     bonus_amount: float

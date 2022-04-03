@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 
-from ...routers import raw_seeds, raid_info
+from ...routers import admin, raw_seeds, raid_info
 
 router = APIRouter(
     prefix="/api/v0",
     tags=[],
     responses={404: {"description": "Not found"}},
 )
+
+router.include_router(admin.router)
 
 router.include_router(raw_seeds.router)
 
