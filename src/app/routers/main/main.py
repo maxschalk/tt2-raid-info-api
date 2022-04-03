@@ -1,11 +1,12 @@
 from fastapi import APIRouter
 
+from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from ...routers import admin, raw_seeds, raid_info
 
 router = APIRouter(
     prefix="/api/v0",
     tags=[],
-    responses={404: {"description": "Not found"}},
+    responses=RESPONSE_STANDARD_NOT_FOUND,
 )
 
 router.include_router(admin.router)

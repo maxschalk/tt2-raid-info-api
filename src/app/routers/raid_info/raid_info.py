@@ -1,21 +1,23 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 
+from src.PATHS import RAW_SEEDS_DIR
 from src.models.raid_data import RaidRawSeedData
 from src.utils import selectors
+from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import get_seed_data_by_recency
 
 router = APIRouter(
     prefix="/raid_info",
-    # tags=["selected_seeds"],
-    responses={404: {"description": "Not found"}},
+    tags=["raid info"],
+    responses=RESPONSE_STANDARD_NOT_FOUND,
 )
 
 
 @router.get("/{tier}/{level}")
 async def raid_info_by_tier_level(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidRawSeedData:
-    seed_data = get_seed_data_by_recency(offset=offset_weeks)
+    seed_data = get_seed_data_by_recency(dir_path=RAW_SEEDS_DIR, offset=offset_weeks)
 
     selectors_and_validators = (
         (selectors.raid_tier, lambda x: x == tier),
@@ -28,6 +30,9 @@ async def raid_info_by_tier_level(tier: int, level: int, offset_weeks: Optional[
     )
 
     if payload is None:
-        raise HTTPException(status_code=400, detail=f"No raid raid_info found for raid level {tier}-{level}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"No raid raid_info found for raid level {tier}-{level}"
+        )
 
     return payload

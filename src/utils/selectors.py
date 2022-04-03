@@ -15,11 +15,16 @@ def select_first_by(data, selectors_and_validators):
 
         return True
 
-    for element in data:
-        if validate_element_attributes(element):
-            return element
+    try:
+        return next(filter(validate_element_attributes, data))
+    except StopIteration:
+        return None
 
-    return None
+    # for element in data:
+    #     if validate_element_attributes(element):
+    #         return element
+
+    # return None
 
 
 def select_all_by(data, selectors_and_validators):
@@ -30,7 +35,7 @@ def select_all_by(data, selectors_and_validators):
 
         return True
 
-    return list(filter(validate_element_attributes, data))
+    return tuple(filter(validate_element_attributes, data))
 
 
 # trivial top level selectors
