@@ -44,20 +44,45 @@ class RaidRawSeedData(BaseModel):
 
     area_buffs: List[Buff] = None
 
-# TODO
+
+class EnhancedTitanPart(TitanPart):
+    total_hp_formatted: str
+
+
+class ConsolidateditanPart(BaseModel):
+    part_id: TitanAnatomy
+
+    armor_hp: int | float
+    body_hp: int | float
+
+    armor_cursed: bool
+    body_cursed: bool
+
+
 class EnhancedTitan(Titan):
     total_armor_hp: int | float
-    total_armor_hp: int | float
+    total_armor_hp_formatted: str
+
+    total_body_hp: int | float
+    total_body_hp_formatted: str
 
     skippable_hp: int | float
+    skippable_hp_formatted: str
 
-    cursed_parts: List[TitanPart]
+    consolidated_parts: List[ConsolidateditanPart]
+
+    cursed_parts: List[EnhancedTitanPart]
     number_of_cursed_parts: int
 
 
 class RaidEnhancedSeedData(RaidRawSeedData):
-    total_target_hp: int | float
+    raid_total_target_hp: int | float
+    raid_total_target_hp_formatted: str
 
+    titans: List[EnhancedTitan]
+
+
+RaidSeedData = RaidRawSeedData | RaidEnhancedSeedData
 
 # SAMPLE
 """

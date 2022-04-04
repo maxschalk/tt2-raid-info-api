@@ -68,8 +68,10 @@ async def create_seed_file(
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
+    filepath = os.path.join(RAW_SEEDS_DIR, filename)
+
     try:
-        file_created = dump_seed_data(filename=filename, data=data)
+        file_created = dump_seed_data(filepath=filepath, data=data)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

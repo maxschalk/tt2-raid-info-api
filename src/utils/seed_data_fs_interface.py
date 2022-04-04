@@ -7,7 +7,7 @@ from typing import Tuple, Optional, Iterator, List
 from fastapi.encoders import jsonable_encoder
 
 from src.PATHS import RAW_SEEDS_DIR
-from src.models.raid_data import RaidRawSeedData
+from src.models.raid_data import RaidSeedData
 from src.utils.SortOrder import SortOrder
 
 
@@ -35,7 +35,7 @@ def get_sorted_seed_filenames(*, dir_path: str, sort_order: SortOrder = SortOrde
     )
 
 
-def load_seed_data(*, filepath: str) -> RaidRawSeedData:
+def load_seed_data(*, filepath: str) -> List[RaidSeedData]:
     if not os.path.isabs(filepath):
         filepath = join(RAW_SEEDS_DIR, filepath)
 
@@ -43,8 +43,8 @@ def load_seed_data(*, filepath: str) -> RaidRawSeedData:
         return json.load(file)
 
 
-def dump_seed_data(*, filename: str, data: List[RaidRawSeedData]) -> bool:
-    filepath = join(RAW_SEEDS_DIR, filename)
+def dump_seed_data(*, filepath: str, data: List[RaidSeedData]) -> bool:
+    # filepath = join(RAW_SEEDS_DIR, filename)
 
     if os.path.exists(filepath):
         return False
@@ -55,7 +55,7 @@ def dump_seed_data(*, filename: str, data: List[RaidRawSeedData]) -> bool:
     return True
 
 
-def get_all_seed_data(*, dir_path: str, ) -> tuple[RaidRawSeedData]:
+def get_all_seed_data(*, dir_path: str, ) -> tuple[List[RaidSeedData]]:
     return tuple(
         load_seed_data(filepath=filepath)
         for filepath
@@ -63,7 +63,7 @@ def get_all_seed_data(*, dir_path: str, ) -> tuple[RaidRawSeedData]:
     )
 
 
-def get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> tuple[RaidRawSeedData]:
+def get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> tuple[List[RaidSeedData]]:
     return tuple(
         load_seed_data(filepath=filepath)
         for filepath
@@ -71,7 +71,7 @@ def get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASC
     )
 
 
-def get_seed_data_by_recency(*, dir_path: str, offset: int = 0) -> Optional[RaidRawSeedData]:
+def get_seed_data_by_recency(*, dir_path: str, offset: int = 0) -> Optional[List[RaidSeedData]]:
     offset = abs(offset)
 
     most_recent_filepaths = get_sorted_seed_filenames(dir_path=dir_path, sort_order=SortOrder.DESCENDING)
@@ -84,5 +84,5 @@ def get_seed_data_by_recency(*, dir_path: str, offset: int = 0) -> Optional[Raid
     return load_seed_data(filepath=selected_filepath)
 
 
-def get_most_recent_seed_data(*, dir_path: str) -> RaidRawSeedData:
+def get_most_recent_seed_data(*, dir_path: str) -> List[RaidSeedData]:
     return get_seed_data_by_recency(dir_path=dir_path, offset=0)
