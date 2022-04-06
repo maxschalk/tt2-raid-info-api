@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from .routers import main
 
@@ -9,4 +10,4 @@ app.include_router(main.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return RedirectResponse("/docs")

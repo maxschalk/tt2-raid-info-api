@@ -7,6 +7,7 @@ from fastapi import APIRouter, Header, HTTPException, status
 from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
 from src.models.raid_data import RaidRawSeedData, RaidDataFile
 from src.utils.SortOrder import SortOrder
+from src.utils.enhance_seeds import main as enhance_seeds
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import (
     dump_seed_data,
@@ -32,7 +33,7 @@ def verify_authorization(*, secret: Optional[str]):
         )
 
 
-@router.get("/all_raw_seed_filepaths")
+@router.get("/all_raw_seed_filenames")
 async def raw_seeds_sorted(
         *,
         sort_order: Optional[SortOrder] = SortOrder.DESCENDING,
@@ -77,6 +78,8 @@ async def create_seed_file(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Something went wrong when interfacing with the filesystem."
         )
+
+    enhance_seeds()
 
     if file_created is False:
         msg = f"File {filename} already exists on the server."

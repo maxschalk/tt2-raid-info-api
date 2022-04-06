@@ -5,7 +5,6 @@ from src.models.titan_anatomy import TITAN_PARTS_ATOMIC, ARMOR_PREFIX, BODY_PREF
 from src.utils import selectors
 from src.utils.format_hp import format_hp
 from src.utils.seed_data_fs_interface import get_all_seed_filenames, load_seed_data, dump_seed_data
-# TODO
 from src.utils.temp_deepcopy import temp_deepcopy
 
 
@@ -20,9 +19,7 @@ def main():
     for filename in delete_seed_filenames:
         filepath = os.path.join(ENHANCED_SEEDS_DIR, filename)
 
-        print(f'delete {filepath}')
-
-        # os.remove(filepath)
+        os.remove(filepath)
 
     for filename in enhance_seed_filenames:
         filepath_raw_seed = os.path.join(RAW_SEEDS_DIR, filename)
