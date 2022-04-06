@@ -3,5 +3,5 @@
 **/.idea
 **/venv
 
-src/raid_seed_data/raw_seeds/*
-src/raid_seed_data/enhanced_seeds/*
+#src/raid_seed_data/raw_seeds/*
+#src/raid_seed_data/enhanced_seeds/*
