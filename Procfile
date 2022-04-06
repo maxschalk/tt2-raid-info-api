@@ -1,1 +1,1 @@
-worker: python -m uvicorn src.app.main:app
+web: python -m uvicorn src.app.main:app
