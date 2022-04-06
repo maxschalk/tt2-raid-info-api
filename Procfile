@@ -1,1 +1,1 @@
-web: python -m uvicorn src.app.main:app
+web: python -m uvicorn src.app.main:app --host=0.0.0.0 --port=${PORT:-5000}
