@@ -17,6 +17,6 @@ router.include_router(raid_info.router)
 
 
 @router.get("/")
-async def most_recent_seed():
+async def welcome():
     #  TODO Link docs
     return {"message": "Welcome to the TT2 Raid Seed API v0"}
