@@ -30,8 +30,6 @@ def main():
 
         dump_seed_data(filepath=filepath_enhanced_seed, data=enhanced_seed_data)
 
-        return
-
 
 def enhance_raid_info(raid_info):
     raid_total_target_hp = selectors.raid_target_hp(raid_info)

@@ -25,7 +25,7 @@ async def sorted_seeds(sort_order: Optional[SortOrder] = SortOrder.DESCENDING) -
 
 @router.get("/most_recent")
 async def seed_by_recency(offset_weeks: Optional[int] = 0) -> List[RaidRawSeedData]:
-    payload = get_seed_data_by_recency(dir_path=ENHANCED_SEEDS_DIR, offset=offset_weeks)
+    payload = get_seed_data_by_recency(dir_path=ENHANCED_SEEDS_DIR, offset_weeks=offset_weeks)
 
     if payload is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Offset too large")

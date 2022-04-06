@@ -15,12 +15,12 @@ router = APIRouter(
 )
 
 
-async def raid_info_by_tier_level_base(dir_path: str,
-                                       tier: int,
-                                       level: int,
-                                       offset_weeks: Optional[int] = 0
-                                       ) -> RaidRawSeedData:
-    seed_data = get_seed_data_by_recency(dir_path=dir_path, offset=offset_weeks)
+def raid_info_by_tier_level_base(dir_path: str,
+                                 tier: int,
+                                 level: int,
+                                 offset_weeks: Optional[int] = 0
+                                 ) -> RaidRawSeedData:
+    seed_data = get_seed_data_by_recency(dir_path=dir_path, offset_weeks=offset_weeks)
 
     selectors_and_validators = (
         (selectors.raid_tier, lambda x: x == tier),
@@ -43,9 +43,9 @@ async def raid_info_by_tier_level_base(dir_path: str,
 
 @router.get("/{tier}/{level}")
 async def raid_info_by_tier_level(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidRawSeedData:
-    return raid_info_by_tier_level_base(dir_path=RAW_SEEDS_DIR, tier=tier, level=level, offset=offset_weeks)
+    return raid_info_by_tier_level_base(dir_path=RAW_SEEDS_DIR, tier=tier, level=level, offset_weeks=offset_weeks)
 
 
-@router.get("/{tier}/{level}/enhanced")
+@router.get("/enhanced/{tier}/{level}")
 async def raid_info_by_tier_level_enhanced(tier: int, level: int, offset_weeks: Optional[int] = 0) -> RaidRawSeedData:
-    return raid_info_by_tier_level_base(dir_path=ENHANCED_SEEDS_DIR, tier=tier, level=level, offset=offset_weeks)
+    return raid_info_by_tier_level_base(dir_path=ENHANCED_SEEDS_DIR, tier=tier, level=level, offset_weeks=offset_weeks)
