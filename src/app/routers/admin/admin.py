@@ -6,7 +6,7 @@ from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import FileResponse
 
 from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
-from src.models.raid_data import RaidRawSeedData, RaidDataFile
+from src.models.raid_data import RaidRawSeedData
 from src.utils.SortOrder import SortOrder
 from src.utils.enhance_seeds import main as enhance_seeds
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
@@ -58,16 +58,14 @@ async def enhanced_seeds_sorted(
     return get_sorted_seed_filenames(dir_path=ENHANCED_SEEDS_DIR, sort_order=sort_order)
 
 
-@router.post("/add_seed")
+@router.post("/add_raw_seed_file/{filename}")
 async def create_seed_file(
+        filename: str,
         *,
-        file: RaidDataFile,
         data: List[RaidRawSeedData],
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)
-
-    filename = file.filename
 
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
@@ -97,13 +95,8 @@ async def create_seed_file(
     }
 
 
-@router.get("/download_raw_seed_file")
-async def download_raw_seed_file(
-        *,
-        file: RaidDataFile,
-) -> FileResponse:
-    filename = file.filename
-
+@router.get("/download_raw_seed_file/{filename}")
+async def download_raw_seed_file(filename: str, ) -> FileResponse:
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
@@ -112,15 +105,13 @@ async def download_raw_seed_file(
     return FileResponse(filepath, media_type='application/json', filename=filename)
 
 
-@router.delete("/delete_raw_seed")
+@router.delete("/delete_raw_seed_file/{filename}")
 async def delete_raw_seed_file(
+        filename: str,
         *,
-        file: RaidDataFile,
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)
-
-    filename = file.filename
 
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
