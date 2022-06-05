@@ -4,7 +4,7 @@ import requests
 
 from test.manual.base import make_request
 
-with open(f"./raid_seed_20220220.json", 'r') as file:
+with open(f"./test_data_20220220.json", 'r') as file:
     seed_data = json.load(file)
 
 file_data = {
