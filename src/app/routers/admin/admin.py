@@ -101,10 +101,7 @@ async def create_seed_file(
 async def download_raw_seed_file(
         *,
         file: RaidDataFile,
-        secret: Optional[str] = Header(None)
 ) -> FileResponse:
-    verify_authorization(secret=secret)
-
     filename = file.filename
 
     if not filename.endswith(".json"):
@@ -115,8 +112,8 @@ async def download_raw_seed_file(
     return FileResponse(filepath, media_type='application/json', filename=filename)
 
 
-@router.delete("/delete_seed")
-async def delete_seed_file(
+@router.delete("/delete_raw_seed")
+async def delete_raw_seed_file(
         *,
         file: RaidDataFile,
         secret: Optional[str] = Header(None)
