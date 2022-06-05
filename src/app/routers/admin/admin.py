@@ -26,6 +26,8 @@ router = APIRouter(
 
 
 def verify_authorization(*, secret: Optional[str]):
+    print(secret)
+
     if not secret or secret != ENV_AUTH_SECRET:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
