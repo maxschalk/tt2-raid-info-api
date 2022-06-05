@@ -1,1 +1,1 @@
-web: waitress-serve --port=5000 src.app.main:app
+web: gunicorn -w 3 -k uvicorn.workers.UvicornWorker src.app.main:app
