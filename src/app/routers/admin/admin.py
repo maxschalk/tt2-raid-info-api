@@ -94,3 +94,39 @@ async def create_seed_file(
             "file_created": file_created,
         }
     }
+
+
+@router.delete("/delete_seed")
+async def delete_seed_file(
+        *,
+        file: RaidDataFile,
+        secret: Optional[str] = Header(None)
+) -> Dict:
+    verify_authorization(secret=secret)
+
+    filename = file.filename
+
+    if not filename.endswith(".json"):
+        filename = f"{filename}.json"
+
+    filepath = os.path.join(RAW_SEEDS_DIR, filename)
+
+    file_deleted = False
+
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        file_deleted = True
+
+    enhance_seeds()
+
+    if file_deleted:
+        msg = f"File at ${filepath} was deleted"
+    else:
+        msg = f"File at ${filepath} could not be found"
+
+    return {
+        status.HTTP_200_OK: {
+            "detail": msg,
+            "file_deleted": file_deleted,
+        }
+    }
