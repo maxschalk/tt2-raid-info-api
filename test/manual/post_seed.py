@@ -9,7 +9,7 @@ with open(f"./raid_seed_20220220.json", 'r') as file:
 
 file_data = {
     "file": {
-        "filename": "raid_seed_20220220"
+        "filename": "test_data"
     },
     "data": seed_data
 }
