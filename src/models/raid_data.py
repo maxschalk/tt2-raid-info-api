@@ -2,8 +2,8 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.models.titan_anatomy import TitanAnatomy
 
+from src.models.titan_anatomy import TitanAnatomy
 
 class RaidDataFile(BaseModel):
     filename: str
@@ -45,7 +45,7 @@ class RaidRawSeedData(BaseModel):
     area_buffs: List[Buff] = None
 
 
-class EnhancedTitanPart(TitanPart, BaseModel):
+class EnhancedTitanPart(TitanPart):
     total_hp_formatted: str
 
 
@@ -59,7 +59,7 @@ class ConsolidateditanPart(BaseModel):
     body_cursed: bool
 
 
-class EnhancedTitan(Titan, BaseModel):
+class EnhancedTitan(Titan):
     total_armor_hp: int | float
     total_armor_hp_formatted: str
 
@@ -75,7 +75,7 @@ class EnhancedTitan(Titan, BaseModel):
     number_of_cursed_parts: int
 
 
-class RaidEnhancedSeedData(RaidRawSeedData, BaseModel):
+class RaidEnhancedSeedData(RaidRawSeedData):
     raid_total_target_hp: int | float
     raid_total_target_hp_formatted: str
 
