@@ -45,7 +45,7 @@ class RaidRawSeedData(BaseModel):
     area_buffs: List[Buff] = None
 
 
-class EnhancedTitanPart(TitanPart):
+class EnhancedTitanPart(BaseModel, TitanPart):
     total_hp_formatted: str
 
 
@@ -59,7 +59,7 @@ class ConsolidateditanPart(BaseModel):
     body_cursed: bool
 
 
-class EnhancedTitan(Titan):
+class EnhancedTitan(BaseModel, Titan):
     total_armor_hp: int | float
     total_armor_hp_formatted: str
 
@@ -75,7 +75,7 @@ class EnhancedTitan(Titan):
     number_of_cursed_parts: int
 
 
-class RaidEnhancedSeedData(RaidRawSeedData):
+class RaidEnhancedSeedData(BaseModel, RaidRawSeedData):
     raid_total_target_hp: int | float
     raid_total_target_hp_formatted: str
 
