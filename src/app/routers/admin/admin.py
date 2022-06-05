@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple, Dict
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, status
+from fastapi.responses import FileResponse
 
 from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
 from src.models.raid_data import RaidRawSeedData, RaidDataFile
@@ -94,6 +95,24 @@ async def create_seed_file(
             "file_created": file_created,
         }
     }
+
+
+@router.get("/download_raw_seed_file")
+async def create_seed_file(
+        *,
+        file: RaidDataFile,
+        secret: Optional[str] = Header(None)
+) -> FileResponse:
+    verify_authorization(secret=secret)
+
+    filename = file.filename
+
+    if not filename.endswith(".json"):
+        filename = f"{filename}.json"
+
+    filepath = os.path.join(RAW_SEEDS_DIR, filename)
+
+    return FileResponse(filepath, media_type='application/json', filename=filename)
 
 
 @router.delete("/delete_seed")
