@@ -98,7 +98,7 @@ async def create_seed_file(
 
 
 @router.get("/download_raw_seed_file")
-async def create_seed_file(
+async def download_raw_seed_file(
         *,
         file: RaidDataFile,
         secret: Optional[str] = Header(None)
