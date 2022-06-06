@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -18,7 +19,7 @@ def down():
         make_request(
             method=requests.get,
             path="admin/all_seed_filenames/raw",
-            stage=Stage.PRODUCTION
+            stage=Stage.STAGING
         )
     )
 
@@ -37,7 +38,7 @@ def down():
         response = make_request(
             method=requests.get,
             path=f"admin/raw_seed_file/{filename}",
-            stage=Stage.PRODUCTION,
+            stage=Stage.STAGING,
             parse_response=False,
             stream=True
         )
@@ -79,22 +80,5 @@ def up():
             method=requests.post,
             path=f"admin/raw_seed_file/{filename}",
             stage=Stage.STAGING,
-            data=seed_data,
+            data=json.dumps(seed_data),
         )
-
-
-print(
-    make_request(
-        method=requests.get,
-        path="admin/all_seed_filenames/raw",
-        stage=Stage.STAGING
-    )
-)
-up()
-print(
-    make_request(
-        method=requests.get,
-        path="admin/all_seed_filenames/raw",
-        stage=Stage.STAGING
-    )
-)

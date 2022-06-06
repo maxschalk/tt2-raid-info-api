@@ -117,9 +117,9 @@ async def delete_raw_seed_file(
 
     if file_deleted:
         enhance_seeds()
-        msg = f"Raw seed file ${filename} was deleted"
+        msg = f"Raw seed file {filename} was deleted"
     else:
-        msg = f"Raw seed file ${filename} could not be found"
+        msg = f"Raw seed file {filename} could not be found"
 
     return {
         status.HTTP_200_OK: {
