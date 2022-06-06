@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from ...routers import admin, raw_seeds, enhanced_seeds, raid_info
+from ...routers import admin, seeds, raid_info
 
 router = APIRouter(
     prefix="/api/v0",
@@ -11,9 +11,7 @@ router = APIRouter(
 
 router.include_router(admin.router)
 
-router.include_router(raw_seeds.router)
-
-router.include_router(enhanced_seeds.router)
+router.include_router(seeds.router)
 
 router.include_router(raid_info.router)
 
