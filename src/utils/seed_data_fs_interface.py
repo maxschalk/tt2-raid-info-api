@@ -6,8 +6,9 @@ from typing import Tuple, Optional, Iterator, List
 
 from fastapi.encoders import jsonable_encoder
 
+from src.PATHS import RAW_SEEDS_DIR
 from src.models.raid_data import RaidSeedData
-from src.utils.SortOrder import SortOrder
+from src.models.SortOrder import SortOrder
 
 
 def _seed_path_generator(*, dir_path: str) -> Iterator[str]:
@@ -80,3 +81,17 @@ def get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optiona
 
 def get_most_recent_seed_data(*, dir_path: str) -> List[RaidSeedData]:
     return get_seed_data_by_recency(dir_path=dir_path, offset_weeks=0)
+
+
+def delete_raw_seed_file(*, filename: str) -> bool:
+    file_path = os.path.join(RAW_SEEDS_DIR, filename)
+
+    if not os.path.exists(file_path):
+        return False
+
+    try:
+        os.remove(file_path)
+    except OSError:
+        return False
+
+    return True
