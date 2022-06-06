@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from ...routers.v0 import main as v0
+from .v0 import main as v0
 
 router = APIRouter(
     prefix="/api",

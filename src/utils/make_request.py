@@ -18,10 +18,10 @@ BASE_URLS = {
 HEADERS = {'secret': ENV_AUTH_SECRET}
 
 
-def make_request(*, method, path, data=None, stage=Stage.DEV, parse_response=True):
+def make_request(*, method, path, data=None, stage=Stage.DEV, parse_response=True, **kwargs):
     base_url = BASE_URLS[stage]
 
-    response = method(f"{base_url}/{path}", headers=HEADERS, data=data)
+    response = method(f"{base_url}/{path}", headers=HEADERS, data=data, **kwargs)
 
     if not parse_response:
         return response

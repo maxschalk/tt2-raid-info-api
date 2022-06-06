@@ -11,7 +11,7 @@ result = make_request(
 
 print("RAW:", result)
 
-result = await make_request(
+result = make_request(
     method=requests.get,
     path="admin/all_seed_filenames/enhanced",
     stage=Stage.DEV
