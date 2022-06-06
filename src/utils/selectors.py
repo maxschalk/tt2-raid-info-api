@@ -1,41 +1,35 @@
 from datetime import datetime
+from functools import reduce
 from typing import Optional, List, Dict, Tuple
 
 import src.models.titan_anatomy as titan_anatomy
+from src.models.ValidatorBinOp import ValidatorBinOp
 from src.utils.safe_parse import safe_parse_datetime, safe_parse_float, safe_parse_int
 
 
 # top level utility functions
 
-def select_first_by(data, selectors_and_validators):
-    def validate_element_attributes(elem):
-        for selector, validator in selectors_and_validators:
-            if not validator(selector(elem)):
-                return False
-
-        return True
+def select_first_by(data, selectors_and_validators, bin_op: ValidatorBinOp = ValidatorBinOp.AND):
+    validator = reduce(
+        lambda acc, elem: (lambda x: bin_op.func(acc(x), elem[1](elem[0](x)))),
+        selectors_and_validators,
+        lambda x: bin_op.initial
+    )
 
     try:
-        return next(filter(validate_element_attributes, data))
+        return next(filter(validator, data))
     except StopIteration:
         return None
 
-    # for element in data:
-    #     if validate_element_attributes(element):
-    #         return element
 
-    # return None
+def select_all_by(data, selectors_and_validators, bin_op: ValidatorBinOp = ValidatorBinOp.AND):
+    validator = reduce(
+        lambda acc, elem: (lambda x: bin_op.func(acc(x), elem[1](elem[0](x)))),
+        selectors_and_validators,
+        lambda x: bin_op.initial
+    )
 
-
-def select_all_by(data, selectors_and_validators):
-    def validate_element_attributes(elem):
-        for selector, validator in selectors_and_validators:
-            if not validator(selector(elem)):
-                return False
-
-        return True
-
-    return tuple(filter(validate_element_attributes, data))
+    return tuple(filter(validator, data))
 
 
 # trivial top level selectors
