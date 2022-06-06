@@ -1,7 +1,7 @@
 import requests
 
 from src.models.Stage import Stage
-from test.manual.base import make_request
+from src.utils.make_request import make_request
 
 result = make_request(
     method=requests.get,
@@ -11,7 +11,7 @@ result = make_request(
 
 print("RAW:", result)
 
-result = await make_request(
+result = make_request(
     method=requests.get,
     path="admin/all_seed_filenames/enhanced",
     stage=Stage.DEV

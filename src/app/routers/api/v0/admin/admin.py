@@ -13,9 +13,9 @@ from src.models.SortOrder import SortOrder
 from src.scripts.enhance_seeds import main as enhance_seeds
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import (
-    dump_seed_data,
-    get_sorted_seed_filenames,
-    delete_raw_seed_file,
+    dump_seed_data as fs_dump_seed_data,
+    get_sorted_seed_filenames as fs_get_sorted_seed_filenames,
+    delete_raw_seed_file as fs_delete_raw_seed_file,
 )
 
 load_dotenv()
@@ -23,7 +23,7 @@ load_dotenv()
 ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
 ENV_STAGE = os.getenv('STAGE')
 
-DISPLAY_IN_DOCS = ENV_STAGE != Stage.PRODUCTION if ENV_STAGE else False
+DISPLAY_IN_DOCS = ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
 
 router = APIRouter(
     prefix="/admin",
@@ -51,7 +51,7 @@ async def seed_filenames(
 
     dir_path = RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
 
-    return get_sorted_seed_filenames(dir_path=dir_path, sort_order=sort_order)
+    return fs_get_sorted_seed_filenames(dir_path=dir_path, sort_order=sort_order)
 
 
 @router.post("/raw_seed_file/{filename}", include_in_schema=DISPLAY_IN_DOCS)
@@ -69,7 +69,7 @@ async def create_seed_file(
     filepath = os.path.join(RAW_SEEDS_DIR, filename)
 
     try:
-        file_created = dump_seed_data(filepath=filepath, data=data)
+        file_created = fs_dump_seed_data(filepath=filepath, data=data)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -113,13 +113,13 @@ async def delete_raw_seed_file(
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
-    file_deleted = delete_raw_seed_file(filename=filename)
+    file_deleted = fs_delete_raw_seed_file(filename=filename)
 
     if file_deleted:
         enhance_seeds()
-        msg = f"Raw seed file ${filename} was deleted"
+        msg = f"Raw seed file {filename} was deleted"
     else:
-        msg = f"Raw seed file ${filename} could not be found"
+        msg = f"Raw seed file {filename} could not be found"
 
     return {
         status.HTTP_200_OK: {
