@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from .routers import main
+from .routers import api
 
 load_dotenv()
 
@@ -20,9 +20,9 @@ app = FastAPI(
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
 
-app.include_router(main.router)
+app.include_router(api.router)
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs")
