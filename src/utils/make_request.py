@@ -18,13 +18,15 @@ BASE_URLS = {
 HEADERS = {'secret': ENV_AUTH_SECRET}
 
 
-def make_request(*, method, path, data=None, stage=Stage.DEV):
+def make_request(*, method, path, data=None, stage=Stage.DEV, parse_response=True):
     base_url = BASE_URLS[stage]
 
     response = method(f"{base_url}/{path}", headers=HEADERS, data=data)
+
+    if not parse_response:
+        return response
 
     try:
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return response.text
-

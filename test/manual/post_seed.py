@@ -3,7 +3,7 @@ import json
 import requests
 
 from src.models.Stage import Stage
-from test.manual.base import make_request
+from src.utils.make_request import make_request
 
 with open(f"./test_data_20220220.json", 'r') as file:
     seed_data = json.load(file)
