@@ -1,12 +1,11 @@
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException, status
 
 from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
-from src.models.raid_data import RaidRawSeedData, RaidEnhancedSeedData, RaidSeedData
+from src.models.SeedType import SeedType
+from src.models.raid_data import RaidSeedData
 from src.utils import selectors
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from src.utils.seed_data_fs_interface import get_seed_data_by_recency
+from src.utils.seed_data_fs_interface import fs_get_seed_data_by_recency
 
 router = APIRouter(
     prefix="/raid_info",
@@ -15,13 +14,26 @@ router = APIRouter(
 )
 
 
-def raid_info_by_tier_level_base(
-        dir_path: str,
+def get_seeds_dir_path(seed_type: SeedType):
+    return RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
+
+
+@router.get("/{seed_type}/{tier}/{level}")
+async def raid_info_by_tier_level(
+        seed_type: SeedType,
         tier: int,
         level: int,
         offset_weeks: int = 0
 ) -> RaidSeedData:
-    seed_data = get_seed_data_by_recency(dir_path=dir_path, offset_weeks=offset_weeks)
+    dir_path = get_seeds_dir_path(seed_type=seed_type)
+
+    seed_data = fs_get_seed_data_by_recency(dir_path=dir_path, offset_weeks=offset_weeks)
+
+    if seed_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Offset too large"
+        )
 
     selectors_and_validators = (
         (selectors.raid_tier, lambda x: x == tier),
@@ -36,25 +48,7 @@ def raid_info_by_tier_level_base(
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"No raid raid_info found for raid level {tier}-{level}"
+            detail=f"No raid info found for raid level {tier}-{level}"
         )
 
     return payload
-
-
-@router.get("/{tier}/{level}")
-async def raid_info_by_tier_level(
-        tier: int,
-        level: int,
-        offset_weeks: int = 0
-) -> RaidRawSeedData:
-    return raid_info_by_tier_level_base(dir_path=RAW_SEEDS_DIR, tier=tier, level=level, offset_weeks=offset_weeks)
-
-
-@router.get("/{tier}/{level}/enhanced")
-async def raid_info_by_tier_level_enhanced(
-        tier: int,
-        level: int,
-        offset_weeks: int = 0
-) -> RaidEnhancedSeedData:
-    return raid_info_by_tier_level_base(dir_path=ENHANCED_SEEDS_DIR, tier=tier, level=level, offset_weeks=offset_weeks)

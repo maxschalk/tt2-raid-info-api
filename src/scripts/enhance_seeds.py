@@ -76,6 +76,8 @@ def enhance_titan_part(titan_part_info):
     titan_part_total_hp = selectors.titan_part_hp(titan_part_info)
     titan_part_info['total_hp_formatted'] = format_hp(titan_part_total_hp)
 
+    titan_part_info['cursed'] = selectors.titan_part_cursed(titan_part_info)
+
     return titan_part_info
 
 
