@@ -32,10 +32,10 @@ def make_request_sync(*, method, path, data=None, stage=Stage.DEV, parse_respons
         return response.text
 
 
-async def make_request_async(*, method, path, stage=Stage.DEV, response_json=False):
+async def make_request_async(*, method, path, data=None, stage=Stage.DEV, response_json=False):
     base_url = BASE_URLS[stage]
 
-    async with method(url=f"{base_url}/{path}") as response:
+    async with method(url=f"{base_url}/{path}", data=data) as response:
         if response_json:
             return await response.json()
 

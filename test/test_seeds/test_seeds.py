@@ -16,47 +16,6 @@ from test.utils.make_request import make_request_sync, make_request_async
 BASE_PATH = "seeds"
 
 
-# def test_seeds_all_raw_contains_posted_seeds(stage: Stage, seeds: List[RaidRawSeedData], seed_type: SeedType):
-#     if stage == Stage.PRODUCTION:
-#         return
-#
-#     response = make_request(
-#         method=requests.get,
-#         path=f"{BASE_PATH}/all/{seed_type.value}",
-#         stage=stage,
-#         parse_response=False
-#     )
-#
-#     assert response.status_code == 200
-#
-#     server_seeds = response.json()
-#
-#     posted_seeds = list(map(lambda t: t[1], seeds))
-#
-#     for posted_seed, server_seed in zip(posted_seeds, server_seeds[-len(posted_seeds):]):
-#         unittest.TestCase().assertListEqual(posted_seed, server_seed)
-#
-#
-# def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, seeds: List[RaidRawSeedData]):
-#     if stage == Stage.PRODUCTION:
-#         return
-#
-#     for i in range(len(seeds)):
-#         response = make_request(
-#             method=requests.get,
-#             path=f"{BASE_PATH}/most_recent/raw?offset_weeks={i}",
-#             stage=stage,
-#             parse_response=False
-#         )
-#
-#         assert response.status_code == 200
-#
-#         server_seed = response.json()
-#
-#         _, most_recent_seed = seeds[-(i + 1)]
-#
-#         unittest.TestCase().assertListEqual(server_seed, most_recent_seed)
-
 def seeds_all_valid_model_base(
         stage: Stage,
         seed_type: SeedType,

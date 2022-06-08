@@ -7,7 +7,7 @@ from test.utils.make_request import make_request_sync
 
 result = make_request_sync(
     method=requests.get,
-    path="raid_info/4/10/enhanced",
+    path="raid_info/enhanced/4/10",
     stage=Stage.DEV
 )
 

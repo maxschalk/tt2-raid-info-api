@@ -22,14 +22,9 @@ def get_all_seed_filenames(*, dir_path: str) -> Tuple[str]:
 
 
 def get_sorted_seed_filenames(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
-    def sort_key(filepath: str):
-        *_, date = filepath.split('_')
-        return date
-
     return tuple(
         sorted(
             _seed_path_generator(dir_path=dir_path),
-            key=sort_key,
             reverse=(sort_order == SortOrder.DESCENDING)
         )
     )
