@@ -1,24 +1,24 @@
 import json
 import os
+import shutil
 
 import requests
 
 from src.PATHS import RAW_SEEDS_DIR
+from src.models.SeedType import SeedType
 from src.models.Stage import Stage
 from src.scripts.enhance_seeds import main as enhance_seeds
-from src.utils.make_request import make_request
 from src.utils.seed_data_fs_interface import get_all_seed_filenames, load_seed_data
-
-import shutil
+from test.utils.make_request import make_request_sync
 
 
 def down():
     print("syncing raid seeds down")
 
     server_seed_filenames = set(
-        make_request(
+        make_request_sync(
             method=requests.get,
-            path="admin/all_seed_filenames/raw",
+            path=f"admin/all_seed_filenames/{SeedType.RAW.valie}",
             stage=Stage.STAGING
         )
     )
@@ -35,7 +35,7 @@ def down():
     for filename in to_sync:
         print(f"creating {filename}")
 
-        response = make_request(
+        response = make_request_sync(
             method=requests.get,
             path=f"admin/raw_seed_file/{filename}",
             stage=Stage.STAGING,
@@ -57,9 +57,9 @@ def up():
     local_seed_filenames = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
 
     server_seed_filenames = set(
-        make_request(
+        make_request_sync(
             method=requests.get,
-            path="admin/all_seed_filenames/raw",
+            path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
             stage=Stage.STAGING
         )
     )
@@ -76,7 +76,7 @@ def up():
 
         seed_data = load_seed_data(filepath=os.path.join(RAW_SEEDS_DIR, filename))
 
-        response = make_request(
+        response = make_request_sync(
             method=requests.post,
             path=f"admin/raw_seed_file/{filename}",
             stage=Stage.STAGING,

@@ -7,9 +7,9 @@ from fastapi.responses import FileResponse
 
 from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
 from src.models.SeedType import SeedType
+from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
 from src.models.raid_data import RaidRawSeedData
-from src.models.SortOrder import SortOrder
 from src.scripts.enhance_seeds import main as enhance_seeds
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import (
@@ -44,7 +44,7 @@ def verify_authorization(*, secret: Optional[str]):
 async def seed_filenames(
         seed_type: SeedType,
         *,
-        sort_order: Optional[SortOrder] = SortOrder.DESCENDING,
+        sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
         secret: Optional[str] = Header(None)
 ) -> Tuple[str]:
     verify_authorization(secret=secret)

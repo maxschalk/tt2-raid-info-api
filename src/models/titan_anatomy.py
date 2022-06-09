@@ -68,5 +68,6 @@ TITAN_ANATOMY = {
         "armor": f"{ARMOR_PREFIX}{titan_part}",
         "body": f"{BODY_PREFIX}{titan_part}"
     }
-    for titan_part in TITAN_PARTS_ATOMIC
+    for titan_part
+    in TITAN_PARTS_ATOMIC
 }

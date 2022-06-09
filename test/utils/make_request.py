@@ -18,7 +18,7 @@ BASE_URLS = {
 HEADERS = {'secret': ENV_AUTH_SECRET}
 
 
-def make_request(*, method, path, data=None, stage=Stage.DEV, parse_response=True, **kwargs):
+def make_request_sync(*, method, path, data=None, stage=Stage.DEV, parse_response=True, **kwargs):
     base_url = BASE_URLS[stage]
 
     response = method(f"{base_url}/{path}", headers=HEADERS, data=data, **kwargs)
@@ -30,3 +30,13 @@ def make_request(*, method, path, data=None, stage=Stage.DEV, parse_response=Tru
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return response.text
+
+
+async def make_request_async(*, method, path, data=None, stage=Stage.DEV, response_json=False):
+    base_url = BASE_URLS[stage]
+
+    async with method(url=f"{base_url}/{path}", data=data) as response:
+        if response_json:
+            return await response.json()
+
+        return response

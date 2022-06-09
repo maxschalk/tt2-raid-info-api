@@ -7,8 +7,8 @@ from typing import Tuple, Optional, Iterator, List
 from fastapi.encoders import jsonable_encoder
 
 from src.PATHS import RAW_SEEDS_DIR
-from src.models.raid_data import RaidSeedData
 from src.models.SortOrder import SortOrder
+from src.models.raid_data import RaidSeedData
 
 
 def _seed_path_generator(*, dir_path: str) -> Iterator[str]:
@@ -22,14 +22,9 @@ def get_all_seed_filenames(*, dir_path: str) -> Tuple[str]:
 
 
 def get_sorted_seed_filenames(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
-    def sort_key(filepath: str):
-        *_, date = filepath.split('_')
-        return date
-
     return tuple(
         sorted(
             _seed_path_generator(dir_path=dir_path),
-            key=sort_key,
             reverse=(sort_order == SortOrder.DESCENDING)
         )
     )
@@ -58,7 +53,7 @@ def get_all_seed_data(*, dir_path: str) -> tuple[List[RaidSeedData]]:
     )
 
 
-def get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> tuple[List[RaidSeedData]]:
+def fs_get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> tuple[List[RaidSeedData]]:
     return tuple(
         load_seed_data(filepath=os.path.join(dir_path, filepath))
         for filepath
@@ -66,7 +61,7 @@ def get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASC
     )
 
 
-def get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optional[List[RaidSeedData]]:
+def fs_get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optional[List[RaidSeedData]]:
     offset_weeks = abs(offset_weeks)
 
     most_recent_filepaths = get_sorted_seed_filenames(dir_path=dir_path, sort_order=SortOrder.DESCENDING)
@@ -80,7 +75,7 @@ def get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optiona
 
 
 def get_most_recent_seed_data(*, dir_path: str) -> List[RaidSeedData]:
-    return get_seed_data_by_recency(dir_path=dir_path, offset_weeks=0)
+    return fs_get_seed_data_by_recency(dir_path=dir_path, offset_weeks=0)
 
 
 def delete_raw_seed_file(*, filename: str) -> bool:

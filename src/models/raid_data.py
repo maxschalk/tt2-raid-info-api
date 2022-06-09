@@ -1,9 +1,7 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
-
-from src.models.titan_anatomy import TitanAnatomy
 
 class RaidDataFile(BaseModel):
     filename: str
@@ -14,21 +12,24 @@ class Buff(BaseModel):
     bonus_amount: float
 
 
+class TitanPart(BaseModel):
+    part_id: str
+    total_hp: float
+    cursed: Optional[bool]
+
+    class Config:
+        use_enum_values = True
+
+
 class Titan(BaseModel):
     enemy_id: str
     enemy_name: str
 
     total_hp: float
-    parts: List
+    parts: List[TitanPart]
 
     area_debuffs: List[Buff] = None
     cursed_debuffs: List[Buff] = None
-
-
-class TitanPart(BaseModel):
-    part_id: TitanAnatomy
-    total_hp: float
-    cursed: bool
 
 
 class RaidRawSeedData(BaseModel):
@@ -46,11 +47,12 @@ class RaidRawSeedData(BaseModel):
 
 
 class EnhancedTitanPart(TitanPart):
+    cursed: bool
     total_hp_formatted: str
 
 
 class ConsolidateditanPart(BaseModel):
-    part_id: TitanAnatomy
+    part_id: str
 
     armor_hp: int | float
     body_hp: int | float
@@ -58,8 +60,13 @@ class ConsolidateditanPart(BaseModel):
     armor_cursed: bool
     body_cursed: bool
 
+    class Config:
+        use_enum_values = True
+
 
 class EnhancedTitan(Titan):
+    parts: List[EnhancedTitanPart]
+
     total_armor_hp: int | float
     total_armor_hp_formatted: str
 
