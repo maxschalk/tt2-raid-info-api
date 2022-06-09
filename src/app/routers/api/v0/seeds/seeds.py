@@ -23,6 +23,7 @@ def get_seeds_dir_path(seed_type: SeedType):
     return RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
 
 
+# TODO Move seed_type to front
 @router.get("/all/{seed_type}")
 async def sorted_seeds(
         seed_type: SeedType,
@@ -33,6 +34,7 @@ async def sorted_seeds(
     return fs_get_sorted_seed_data(dir_path=dir_path, sort_order=sort_order)
 
 
+# TODO Move seed_type to front
 @router.get("/most_recent/{seed_type}")
 async def seed_by_recency(
         seed_type: SeedType,
