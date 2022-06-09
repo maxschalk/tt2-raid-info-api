@@ -59,19 +59,14 @@ def seeds_all_sort_order_base(stage: Stage, seed_type: SeedType, sort_order: Sor
 
     server_seeds = response.json()
 
-    server_seeds_valid_from_dates = map(lambda seed: seed[0]["raid_info_valid_from"], server_seeds)
+    server_seeds_valid_from_dates = list(map(lambda seed: seed[0]["raid_info_valid_from"], server_seeds))
 
     if sort_order in {None, SortOrder.ASCENDING}:
         op = operator.le
     else:
         op = operator.ge
 
-    prev = next(server_seeds_valid_from_dates)
-
-    for server_seeds_valid_from_date in server_seeds_valid_from_dates:
-        assert op(prev, server_seeds_valid_from_date)
-
-        prev = server_seeds_valid_from_date
+    assert all(op(a, b) for a, b in zip(server_seeds_valid_from_dates, server_seeds_valid_from_dates[1:]))
 
 
 def test_seeds_all_raw_default_is_ascending(stage: Stage):
@@ -128,7 +123,7 @@ def test_seeds_most_recent_enhanced_valid_model(stage: Stage):
 
 @pytest.mark.asyncio
 async def test_seeds_most_recent_get_descending_seeds(stage: Stage):
-    for seed_type in (SeedType.RAW, SeedType.ENHANCED):
+    for seed_type in SeedType:
         all_server_seeds = make_request_sync(
             method=requests.get,
             path=f"{BASE_PATH}/all/{seed_type.value}?sort_order={SortOrder.DESCENDING.value}",

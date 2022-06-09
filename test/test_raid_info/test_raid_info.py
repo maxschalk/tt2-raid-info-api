@@ -57,7 +57,7 @@ async def test_raid_info_invalid_tier_level(stage: Stage):
     paths = tuple(
         f"{BASE_PATH}/{seed_type.value}/{tier}/{level}"
         for (tier, level) in cases
-        for seed_type in (SeedType.RAW, SeedType.ENHANCED)
+        for seed_type in SeedType
     )
 
     async with aiohttp.ClientSession() as session:

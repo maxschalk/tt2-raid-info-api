@@ -28,22 +28,15 @@ def get_all_filenames_base(stage: Stage, seed_type: SeedType, sort_order: SortOr
 
     assert any(filename.endswith('test') for filename in filenames) is False
 
-    filenames_iter = iter(filenames)
-
     if sort_order in {None, SortOrder.ASCENDING}:
         op = operator.le
     else:
         op = operator.ge
 
-    prev = next(filenames_iter)
-
-    for filename in filenames_iter:
-        assert op(prev, filename)
-
-        prev = filename
+    assert all(op(a, b) for a, b in zip(filenames, filenames[1:]))
 
 
 def test_get_all_filenames(stage: Stage):
-    for seed_type in (SeedType.RAW, SeedType.ENHANCED):
-        for sort_order in (None, SortOrder.ASCENDING, SortOrder.DESCENDING):
+    for seed_type in SeedType:
+        for sort_order in (None, *SortOrder):
             get_all_filenames_base(stage, seed_type, sort_order)

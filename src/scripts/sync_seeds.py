@@ -5,6 +5,7 @@ import shutil
 import requests
 
 from src.PATHS import RAW_SEEDS_DIR
+from src.models.SeedType import SeedType
 from src.models.Stage import Stage
 from src.scripts.enhance_seeds import main as enhance_seeds
 from src.utils.seed_data_fs_interface import get_all_seed_filenames, load_seed_data
@@ -17,7 +18,7 @@ def down():
     server_seed_filenames = set(
         make_request_sync(
             method=requests.get,
-            path="admin/all_seed_filenames/raw",
+            path=f"admin/all_seed_filenames/{SeedType.RAW.valie}",
             stage=Stage.STAGING
         )
     )
@@ -58,7 +59,7 @@ def up():
     server_seed_filenames = set(
         make_request_sync(
             method=requests.get,
-            path="admin/all_seed_filenames/raw",
+            path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
             stage=Stage.STAGING
         )
     )
