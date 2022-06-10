@@ -64,12 +64,16 @@ def fs_get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.
 def fs_get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optional[List[RaidSeedData]]:
     offset_weeks = abs(offset_weeks)
 
-    most_recent_filepaths = get_sorted_seed_filenames(dir_path=dir_path, sort_order=SortOrder.DESCENDING)
+    most_recent_filepaths = get_sorted_seed_filenames(
+        dir_path=dir_path, sort_order=SortOrder.DESCENDING
+    )
 
     if offset_weeks >= len(most_recent_filepaths):
         return None
 
-    selected_filepath = os.path.join(dir_path, most_recent_filepaths[offset_weeks])
+    selected_filepath = os.path.join(
+        dir_path, most_recent_filepaths[offset_weeks]
+    )
 
     return load_seed_data(filepath=selected_filepath)
 
