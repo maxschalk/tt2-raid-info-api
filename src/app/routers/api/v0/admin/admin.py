@@ -1,22 +1,22 @@
 import os
-from typing import Optional, List, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import FileResponse
-
-from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
+from src.models.raid_data import RaidRawSeedData
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
-from src.models.raid_data import RaidRawSeedData
+from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.scripts.enhance_seeds import main as enhance_seeds
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from src.utils.seed_data_fs_interface import (
-    dump_seed_data as fs_dump_seed_data,
-    get_sorted_seed_filenames as fs_get_sorted_seed_filenames,
-    delete_raw_seed_file as fs_delete_raw_seed_file,
-)
+from src.utils.seed_data_fs_interface import \
+    delete_raw_seed_file as fs_delete_raw_seed_file
+from src.utils.seed_data_fs_interface import \
+    dump_seed_data as fs_dump_seed_data
+from src.utils.seed_data_fs_interface import \
+    get_sorted_seed_filenames as fs_get_sorted_seed_filenames
 
 load_dotenv()
 
@@ -76,11 +76,11 @@ async def create_seed_file(
             detail=f"Something went wrong when interfacing with the filesystem."
         )
 
-    enhance_seeds()
-
     if file_created is False:
         msg = f"File {filename} already exists on the server."
     else:
+        enhance_seeds()
+
         msg = f"File {filename} created."
 
     return {

@@ -2,7 +2,6 @@ import os
 
 import requests
 from dotenv import load_dotenv
-
 from src.models.Stage import Stage
 
 load_dotenv()
@@ -21,7 +20,12 @@ HEADERS = {'secret': ENV_AUTH_SECRET}
 def make_request_sync(*, method, path, data=None, stage=Stage.DEV, parse_response=True, **kwargs):
     base_url = BASE_URLS[stage]
 
-    response = method(f"{base_url}/{path}", headers=HEADERS, data=data, **kwargs)
+    response = method(
+        f"{base_url}/{path}",
+        headers=HEADERS,
+        data=data,
+        **kwargs
+    )
 
     if not parse_response:
         return response
