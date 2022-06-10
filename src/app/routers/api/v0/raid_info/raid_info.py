@@ -27,7 +27,8 @@ async def raid_info_by_tier_level(
 ) -> RaidSeedData:
     dir_path = get_seeds_dir_path(seed_type=seed_type)
 
-    seed_data = fs_get_seed_data_by_recency(dir_path=dir_path, offset_weeks=offset_weeks)
+    seed_data = fs_get_seed_data_by_recency(
+        dir_path=dir_path, offset_weeks=offset_weeks)
 
     if seed_data is None:
         raise HTTPException(

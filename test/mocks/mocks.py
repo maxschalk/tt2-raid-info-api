@@ -77,8 +77,10 @@ def mock_enhanced_titan() -> EnhancedTitan:
         total_body_hp_formatted=fake.pystr(),
         skippable_hp=choice((fake.pyfloat(), fake.pyint())),
         skippable_hp_formatted=fake.pystr(),
-        consolidated_parts=[mock_consolidated_titan_part() for _ in range(randint(3, 10))],
-        cursed_parts=[mock_enhanced_titan_part() for _ in range(randint(3, 10))],
+        consolidated_parts=[mock_consolidated_titan_part()
+                            for _ in range(randint(3, 10))],
+        cursed_parts=[mock_enhanced_titan_part()
+                      for _ in range(randint(3, 10))],
         number_of_cursed_parts=fake.pyint()
     )
 
@@ -94,11 +96,13 @@ def _mock_raid_raw_seed_data_gen() -> Iterator[RaidRawSeedData]:
         titans = [mock_titan() for _ in range(randint(3, 10))]
 
         yield RaidRawSeedData(
-            spawn_sequence=[choice(titans).enemy_name for _ in range(randint(3, 10))],
+            spawn_sequence=[
+                choice(titans).enemy_name for _ in range(randint(3, 10))
+            ],
             raid_info_valid_from=valid_from.isoformat(),
             raid_info_expire_at=expire_at.isoformat(),
-            tier=str(fake.pyint()),
-            level=str(fake.pyint()),
+            tier=str(fake.unique.pyint()),
+            level=str(fake.unique.pyint()),
             titans=titans,
             area_buffs=[mock_buff() for _ in range(randint(3, 10))]
         )
@@ -123,8 +127,8 @@ def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidEnhancedSeedData]:
             spawn_sequence=[fake.pystr() for _ in range(randint(3, 10))],
             raid_info_valid_from=valid_from.isoformat(),
             raid_info_expire_at=expire_at.isoformat(),
-            tier=str(fake.pyint()),
-            level=str(fake.pyint()),
+            tier=str(fake.unique.pyint()),
+            level=str(fake.unique.pyint()),
             area_buffs=[mock_buff() for _ in range(randint(3, 10))],
             raid_total_target_hp=choice((fake.pyfloat(), fake.pyint())),
             raid_total_target_hp_formatted=fake.pystr(),

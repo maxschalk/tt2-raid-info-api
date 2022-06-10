@@ -65,7 +65,8 @@ def admin_get_all_filenames_base(
 def test_admin_get_all_filenames(stage: Stage, posted_seeds: List[Tuple[str, RaidRawSeedData]]):
     for seed_type in SeedType:
         for sort_order in (None, *SortOrder):
-            admin_get_all_filenames_base(stage, posted_seeds, seed_type, sort_order)
+            admin_get_all_filenames_base(
+                stage, posted_seeds, seed_type, sort_order)
 
 
 def test_admin_download_file(
