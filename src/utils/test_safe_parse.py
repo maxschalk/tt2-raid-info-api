@@ -50,13 +50,12 @@ CASES_INT = (
     ({"from_str": "42.10"}, None),
     ({"from_str": "42,510"}, None),
     ({"from_str": True}, None),
-    ({"from_str": 420}, None),
+    ({"from_str": 420}, 420),
     ({"from_str": "some string"}, None),
     ({"from_str": [1, 2, 3]}, None),
 
     ({"from_str": "42,510", "default": 10}, 10),
     ({"from_str": True, "default": 10}, 10),
-    ({"from_str": 420, "default": 10}, 10),
     ({"from_str": "some string", "default": 10}, 10),
     ({"from_str": [1, 2, 3], "default": 10}, 10),
 )
