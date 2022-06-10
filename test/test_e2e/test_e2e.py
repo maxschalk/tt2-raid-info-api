@@ -170,7 +170,7 @@ def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidRawSeedDat
 async def test_raid_info_exists(stage: Stage, posted_seeds: List[RaidRawSeedData]):
     all_filenames = make_request_sync(
         method=requests.get,
-        path=f"admin/all_seed_filenames/{SeedType.ENHANCED.value}",
+        path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
         stage=stage,
     )
 

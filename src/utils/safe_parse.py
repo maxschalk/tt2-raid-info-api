@@ -3,7 +3,13 @@ from typing import Optional, Callable, Any
 
 
 def _safe_parse_base(from_str: str, constructor: Callable, default: Any = None) -> Optional[Any]:
-    return constructor(from_str) if from_str else default
+    if type(from_str) is not str:
+        return default
+
+    try:
+        return constructor(from_str)
+    except (ValueError, TypeError):
+        return default
 
 
 def safe_parse_datetime(from_str: str, default: datetime = None) -> Optional[datetime]:

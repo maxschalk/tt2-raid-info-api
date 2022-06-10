@@ -18,7 +18,7 @@ def down():
     server_seed_filenames = set(
         make_request_sync(
             method=requests.get,
-            path=f"admin/all_seed_filenames/{SeedType.RAW.valie}",
+            path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
             stage=Stage.STAGING
         )
     )
