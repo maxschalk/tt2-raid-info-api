@@ -1,19 +1,20 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, StrictStr
+from src.models.titan_anatomy import TitanAnatomy
 
 
 class RaidDataFile(BaseModel):
-    filename: str
+    filename: StrictStr
 
 
 class Buff(BaseModel):
-    bonus_type: str
+    bonus_type: StrictStr
     bonus_amount: float
 
 
 class TitanPart(BaseModel):
-    part_id: str
+    part_id: StrictStr
     total_hp: float
     cursed: Optional[bool]
 
@@ -22,8 +23,8 @@ class TitanPart(BaseModel):
 
 
 class Titan(BaseModel):
-    enemy_id: str
-    enemy_name: str
+    enemy_id: StrictStr
+    enemy_name: StrictStr
 
     total_hp: float
     parts: List[TitanPart]
@@ -33,7 +34,7 @@ class Titan(BaseModel):
 
 
 class RaidRawSeedData(BaseModel):
-    spawn_sequence: List[str]
+    spawn_sequence: List[StrictStr]
 
     raid_info_valid_from: str
     raid_info_expire_at: str
@@ -48,11 +49,11 @@ class RaidRawSeedData(BaseModel):
 
 class EnhancedTitanPart(TitanPart):
     cursed: bool
-    total_hp_formatted: str
+    total_hp_formatted: StrictStr
 
 
 class ConsolidateditanPart(BaseModel):
-    part_id: str
+    part_id: StrictStr
 
     armor_hp: int | float
     body_hp: int | float
@@ -68,13 +69,13 @@ class EnhancedTitan(Titan):
     parts: List[EnhancedTitanPart]
 
     total_armor_hp: int | float
-    total_armor_hp_formatted: str
+    total_armor_hp_formatted: StrictStr
 
     total_body_hp: int | float
-    total_body_hp_formatted: str
+    total_body_hp_formatted: StrictStr
 
     skippable_hp: int | float
-    skippable_hp_formatted: str
+    skippable_hp_formatted: StrictStr
 
     consolidated_parts: List[ConsolidateditanPart]
 
@@ -84,7 +85,7 @@ class EnhancedTitan(Titan):
 
 class RaidEnhancedSeedData(RaidRawSeedData):
     raid_total_target_hp: int | float
-    raid_total_target_hp_formatted: str
+    raid_total_target_hp_formatted: StrictStr
 
     titans: List[EnhancedTitan]
 
