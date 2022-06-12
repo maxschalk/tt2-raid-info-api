@@ -1,16 +1,20 @@
 import os
 
-from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
-from src.models.titan_anatomy import TITAN_PARTS_ATOMIC, ARMOR_PREFIX, BODY_PREFIX
+from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
+                                      TITAN_PARTS_ATOMIC)
+from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
 from src.utils.format_hp import format_hp
-from src.utils.seed_data_fs_interface import get_all_seed_filenames, load_seed_data, dump_seed_data
+from src.utils.seed_data_fs_interface import (dump_seed_data,
+                                              get_all_seed_filenames,
+                                              load_seed_data)
 from src.utils.temp_deepcopy import temp_deepcopy
 
 
 def main():
     raw_seed_paths = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
-    enhanced_seed_paths = set(get_all_seed_filenames(dir_path=ENHANCED_SEEDS_DIR))
+    enhanced_seed_paths = set(
+        get_all_seed_filenames(dir_path=ENHANCED_SEEDS_DIR))
 
     delete_seed_filenames = enhanced_seed_paths - raw_seed_paths
 
@@ -26,15 +30,18 @@ def main():
         raw_seed_data = load_seed_data(filepath=filepath_raw_seed)
 
         filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
-        enhanced_seed_data = list(map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
+        enhanced_seed_data = list(
+            map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
 
-        dump_seed_data(filepath=filepath_enhanced_seed, data=enhanced_seed_data)
+        dump_seed_data(filepath=filepath_enhanced_seed,
+                       data=enhanced_seed_data)
 
 
 def enhance_raid_info(raid_info):
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
-    raid_info['raid_total_target_hp_formatted'] = format_hp(raid_total_target_hp)
+    raid_info['raid_total_target_hp_formatted'] = format_hp(
+        raid_total_target_hp)
 
     raid_info_titans = selectors.raid_titans(raid_info)
 
@@ -76,7 +83,8 @@ def enhance_titan_part(titan_part_info):
     titan_part_total_hp = selectors.titan_part_hp(titan_part_info)
     titan_part_info['total_hp_formatted'] = format_hp(titan_part_total_hp)
 
-    titan_part_info['cursed'] = selectors.titan_part_cursed(titan_part_info)
+    cursed = selectors.titan_part_cursed(titan_part_info)
+    titan_part_info['cursed'] = False if cursed is None else cursed
 
     return titan_part_info
 
@@ -109,14 +117,16 @@ def consolidated_titan_parts(titan_info):
 
                 if titan_part_part_id.startswith(ARMOR_PREFIX):
                     consolidated_part['armor_hp'] = titan_part['total_hp']
-                    consolidated_part['armor_hp_formatted'] = format_hp(titan_part['total_hp'])
+                    consolidated_part['armor_hp_formatted'] = format_hp(
+                        titan_part['total_hp'])
 
                     if 'cursed' in titan_part:
                         consolidated_part['armor_cursed'] = titan_part['cursed']
 
                 elif titan_part_part_id.startswith(BODY_PREFIX):
                     consolidated_part['body_hp'] = titan_part['total_hp']
-                    consolidated_part['body_hp_formatted'] = format_hp(titan_part['total_hp'])
+                    consolidated_part['body_hp_formatted'] = format_hp(
+                        titan_part['total_hp'])
 
                     if 'cursed' in titan_part:
                         consolidated_part['body_cursed'] = titan_part['cursed']

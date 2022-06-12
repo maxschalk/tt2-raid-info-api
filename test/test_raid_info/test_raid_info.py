@@ -1,12 +1,11 @@
 import asyncio
+from test.utils.make_request import make_request_async
 
 import aiohttp
 import pytest
-
+from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
 from src.models.SeedType import SeedType
 from src.models.Stage import Stage
-from src.models.raid_data import RaidRawSeedData, RaidEnhancedSeedData
-from test.utils.make_request import make_request_async
 
 BASE_PATH = "raid_info"
 

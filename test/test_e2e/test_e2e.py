@@ -1,5 +1,7 @@
 import asyncio
 import operator
+from test.utils.assert_deep_equals import assert_deep_equals
+from test.utils.make_request import make_request_async, make_request_sync
 from typing import List, Tuple
 
 import aiohttp
@@ -7,14 +9,11 @@ import pytest
 import requests
 from dotenv import load_dotenv
 from pydantic import ValidationError
-
+from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
-from src.models.raid_data import RaidRawSeedData, RaidEnhancedSeedData
 from src.utils import selectors
-from test.utils.assert_deep_equals import assert_deep_equals
-from test.utils.make_request import make_request_sync, make_request_async
 
 load_dotenv()
 
@@ -76,7 +75,7 @@ def test_admin_download_file(
     for filename, posted_seed in posted_seeds:
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_ADMIN}/raw_seed_file/{filename}",
+            path=f"{BASE_PATH_ADMIN}/seed_file/{SeedType.RAW.value}/{filename}",
             stage=stage,
             parse_response=False
         )
@@ -97,7 +96,7 @@ def test_seeds_all_raw_contains_posted_seeds(
 ):
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH_SEEDS}/all/{SeedType.RAW.value}",
+        path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}/all",
         stage=stage,
         parse_response=False
     )
@@ -124,7 +123,7 @@ def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: 
     for i, (_, posted_seed) in enumerate(posted_seeds):
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_SEEDS}/most_recent/raw?offset_weeks={files_count - 1 - i}",
+            path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}/most_recent?offset_weeks={files_count - 1 - i}",
             stage=stage,
             parse_response=False
         )
@@ -148,7 +147,7 @@ def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidRawSeedDat
     for i, (_, posted_seed) in enumerate(posted_seeds):
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_SEEDS}/most_recent/{SeedType.ENHANCED.value}?offset_weeks={files_count - 1 - i}",
+            path=f"{BASE_PATH_SEEDS}/{SeedType.ENHANCED.value}/most_recent?offset_weeks={files_count - 1 - i}",
             stage=stage,
             parse_response=False
         )

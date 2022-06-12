@@ -1,16 +1,16 @@
-from typing import Tuple, List
+import os
+from typing import List, Tuple
 
 from fastapi import APIRouter, HTTPException, status
-
-from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
+from fastapi.responses import FileResponse
+from src.models.raid_data import RaidSeedData
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
-from src.models.raid_data import RaidSeedData
+from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
+from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from src.utils.seed_data_fs_interface import (
-    fs_get_sorted_seed_data,
-    fs_get_seed_data_by_recency
-)
+from src.utils.seed_data_fs_interface import (fs_get_seed_data_by_recency,
+                                              fs_get_sorted_seed_data)
 
 router = APIRouter(
     prefix="/seeds",
@@ -19,12 +19,8 @@ router = APIRouter(
 )
 
 
-def get_seeds_dir_path(seed_type: SeedType):
-    return RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
-
-
 # TODO Move seed_type to front
-@router.get("/all/{seed_type}")
+@router.get("/{seed_type}/all")
 async def sorted_seeds(
         seed_type: SeedType,
         sort_order: SortOrder = SortOrder.ASCENDING
@@ -35,14 +31,15 @@ async def sorted_seeds(
 
 
 # TODO Move seed_type to front
-@router.get("/most_recent/{seed_type}")
+@router.get("/{seed_type}/most_recent")
 async def seed_by_recency(
         seed_type: SeedType,
         offset_weeks: int = 0
 ) -> List[RaidSeedData]:
     dir_path = get_seeds_dir_path(seed_type=seed_type)
 
-    payload = fs_get_seed_data_by_recency(dir_path=dir_path, offset_weeks=offset_weeks)
+    payload = fs_get_seed_data_by_recency(
+        dir_path=dir_path, offset_weeks=offset_weeks)
 
     if payload is None:
         raise HTTPException(

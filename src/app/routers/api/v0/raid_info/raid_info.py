@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
-
-from src.PATHS import RAW_SEEDS_DIR, ENHANCED_SEEDS_DIR
-from src.models.SeedType import SeedType
 from src.models.raid_data import RaidSeedData
+from src.models.SeedType import SeedType
+from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
+from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import fs_get_seed_data_by_recency
 
@@ -12,10 +12,6 @@ router = APIRouter(
     tags=["raid info"],
     responses=RESPONSE_STANDARD_NOT_FOUND,
 )
-
-
-def get_seeds_dir_path(seed_type: SeedType):
-    return RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
 
 
 @router.get("/{seed_type}/{tier}/{level}")
