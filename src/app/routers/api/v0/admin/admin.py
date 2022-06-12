@@ -100,7 +100,19 @@ async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResp
 
     filepath = os.path.join(dir_path, filename)
 
-    return FileResponse(filepath, media_type='application/json', filename=filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{seed_type.value} file {filename} does not exist"
+        )
+
+    try:
+        return FileResponse(filepath, media_type='application/json', filename=filename)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Something went wrong when getting the file: {e}"
+        )
 
 
 @router.delete("/raw_seed_file/{filename}", include_in_schema=DISPLAY_IN_DOCS)
