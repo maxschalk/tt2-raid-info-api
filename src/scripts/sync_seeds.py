@@ -1,15 +1,17 @@
 import json
 import os
 import shutil
+from test.utils.make_request import make_request_sync
 
 import requests
-
-from src.PATHS import RAW_SEEDS_DIR
 from src.models.SeedType import SeedType
 from src.models.Stage import Stage
+from src.PATHS import RAW_SEEDS_DIR
 from src.scripts.enhance_seeds import main as enhance_seeds
-from src.utils.seed_data_fs_interface import get_all_seed_filenames, load_seed_data
-from test.utils.make_request import make_request_sync
+from src.utils.seed_data_fs_interface import (get_all_seed_filenames,
+                                              load_seed_data)
+
+STAGE = Stage.PRODUCTION
 
 
 def down():
@@ -19,7 +21,7 @@ def down():
         make_request_sync(
             method=requests.get,
             path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-            stage=Stage.STAGING
+            stage=STAGE
         )
     )
 
@@ -33,18 +35,34 @@ def down():
     print("to sync down:", to_sync)
 
     for filename in to_sync:
-        print(f"creating {filename}")
+
+        print(f"{filename}:")
+        print(f"-- getting '{filename}'")
 
         response = make_request_sync(
             method=requests.get,
-            path=f"admin/raw_seed_file/{filename}",
-            stage=Stage.STAGING,
+            path=f"admin/seed_file/{SeedType.RAW.value}/{filename}",
+            stage=STAGE,
             parse_response=False,
             stream=True
         )
 
-        with open(os.path.join(RAW_SEEDS_DIR, filename), 'wb') as f:
-            shutil.copyfileobj(response.raw, f)
+        if response.status_code != 200:
+            print(
+                f"Error when getting 'admin/seed_file/{SeedType.RAW.value}/{filename}'"
+            )
+            print(f"\t{response.status_code=}: {response.text}")
+            continue
+
+        print(f"-- creating {filename}")
+
+        try:
+            with open(os.path.join(RAW_SEEDS_DIR, filename), 'wb') as f:
+                shutil.copyfileobj(response.raw, f)
+        except Exception as e:
+            print(f"Error when creating '{filename}': {e}")
+
+        print(f"-- created '{filename}'")
 
     print("enhancing seeds")
 
@@ -60,7 +78,7 @@ def up():
         make_request_sync(
             method=requests.get,
             path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-            stage=Stage.STAGING
+            stage=STAGE
         )
     )
 
@@ -74,11 +92,28 @@ def up():
     for filename in to_sync:
         print(f"posting {filename}")
 
-        seed_data = load_seed_data(filepath=os.path.join(RAW_SEEDS_DIR, filename))
+        seed_data = load_seed_data(
+            filepath=os.path.join(RAW_SEEDS_DIR, filename))
 
         response = make_request_sync(
             method=requests.post,
             path=f"admin/raw_seed_file/{filename}",
-            stage=Stage.STAGING,
+            stage=STAGE,
             data=json.dumps(seed_data),
         )
+
+
+def main():
+    up_down = input("Sync (U)p or (D)own? Anything else aborts | U/D/* > ")
+
+    if up_down.upper() == 'D':
+        down()
+        return
+
+    if up_down.upper() == 'U':
+        up()
+
+
+if __name__ == "__main__":
+
+    main()
