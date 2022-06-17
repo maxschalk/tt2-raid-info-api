@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from dotenv import load_dotenv
@@ -22,6 +23,19 @@ app = FastAPI(
         "defaultModelsExpandDepth": -1,
         "tryItOutEnabled": ENV_STAGE != Stage.DEV
     }
+)
+
+origins = [
+    "http://localhost:3000",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(api.router)
