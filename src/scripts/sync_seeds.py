@@ -17,13 +17,24 @@ STAGE = Stage.PRODUCTION
 def down():
     print(f"syncing raid seeds down from {STAGE=}")
 
-    server_seed_filenames = set(
-        make_request_sync(
-            method=requests.get,
-            path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-            stage=STAGE
-        )
+    response = make_request_sync(
+        method=requests.get,
+        path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
+        stage=STAGE,
+        parse_response=False
     )
+
+    if response.status_code != 200:
+        print(
+            f"Error when getting 'admin/all_seed_filenames/{SeedType.RAW.value}'"
+        )
+        print(f"\t{response.status_code=}: {response.text}")
+
+        return
+
+    data = response.json()
+
+    server_seed_filenames = set(data)
 
     local_seed_filenames = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
 
@@ -103,6 +114,7 @@ def up():
             path=f"admin/raw_seed_file/{filename}",
             stage=STAGE,
             data=json.dumps(seed_data),
+            parse_response=False
         )
 
         if response.status_code != 201:
