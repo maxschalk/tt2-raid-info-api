@@ -48,7 +48,7 @@ async def seed_filenames(
         sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
         secret: Optional[str] = Header(None)
 ) -> Tuple[str]:
-    verify_authorization(secret=secret)
+    # verify_authorization(secret=secret)
 
     dir_path = RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
 
