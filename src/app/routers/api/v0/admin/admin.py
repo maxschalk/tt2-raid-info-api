@@ -4,12 +4,12 @@ from typing import Dict, List, Optional, Tuple
 from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, Response, status
 from fastapi.responses import FileResponse
-from src.models.raid_data import RaidRawSeedData
+from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
 from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
-from src.scripts.enhance_seeds import main as enhance_seeds
+from src.scripts.enhance_seeds import enhance_raid_info, main as enhance_seeds
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import \
@@ -46,13 +46,50 @@ async def seed_filenames(
         seed_type: SeedType,
         *,
         sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
-        secret: Optional[str] = Header(None)
 ) -> Tuple[str]:
-    # verify_authorization(secret=secret)
 
     dir_path = RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
 
     return fs_get_sorted_seed_filenames(dir_path=dir_path, sort_order=sort_order)
+
+
+@router.get("/seed_file/{seed_type}/{filename}", include_in_schema=DISPLAY_IN_DOCS)
+async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResponse:
+    if not filename.endswith(".json"):
+        filename = f"{filename}.json"
+
+    dir_path = get_seeds_dir_path(seed_type=seed_type)
+
+    filepath = os.path.join(dir_path, filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{seed_type.value} file {filename} does not exist"
+        )
+
+    try:
+        return FileResponse(filepath, media_type='application/json', filename=filename)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Something went wrong when getting the file: {e}"
+        )
+
+
+@router.get("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
+async def create_seed_file(
+        *,
+        data: list[RaidRawSeedData],
+) -> list[RaidEnhancedSeedData]:
+
+    #  TODO TEST
+
+    enhanced_seed_data = list(
+        map(enhance_raid_info, data)
+    )
+
+    return enhanced_seed_data
 
 
 @router.post("/raw_seed_file/{filename}", status_code=201, include_in_schema=DISPLAY_IN_DOCS)
@@ -89,30 +126,6 @@ async def create_seed_file(
         "filename": filename,
         "created": file_created,
     }
-
-
-@router.get("/seed_file/{seed_type}/{filename}", include_in_schema=DISPLAY_IN_DOCS)
-async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResponse:
-    if not filename.endswith(".json"):
-        filename = f"{filename}.json"
-
-    dir_path = get_seeds_dir_path(seed_type=seed_type)
-
-    filepath = os.path.join(dir_path, filename)
-
-    if not os.path.exists(filepath):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"{seed_type.value} file {filename} does not exist"
-        )
-
-    try:
-        return FileResponse(filepath, media_type='application/json', filename=filename)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Something went wrong when getting the file: {e}"
-        )
 
 
 @router.delete("/raw_seed_file/{filename}", include_in_schema=DISPLAY_IN_DOCS)

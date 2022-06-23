@@ -1,4 +1,5 @@
 import os
+from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidRawSeedData, Titan, TitanPart
 
 from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                       TITAN_PARTS_ATOMIC)
@@ -29,15 +30,19 @@ def main():
         filepath_raw_seed = os.path.join(RAW_SEEDS_DIR, filename)
         raw_seed_data = load_seed_data(filepath=filepath_raw_seed)
 
-        filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
         enhanced_seed_data = list(
-            map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
+            map(enhance_raid_info, temp_deepcopy(raw_seed_data))
+        )
 
-        dump_seed_data(filepath=filepath_enhanced_seed,
-                       data=enhanced_seed_data)
+        filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
+
+        dump_seed_data(
+            filepath=filepath_enhanced_seed,
+            data=enhanced_seed_data
+        )
 
 
-def enhance_raid_info(raid_info):
+def enhance_raid_info(raid_info: RaidRawSeedData) -> RaidRawSeedData:
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
     raid_info['raid_total_target_hp_formatted'] = format_hp(
@@ -52,7 +57,7 @@ def enhance_raid_info(raid_info):
     return raid_info
 
 
-def enhance_titan_info(titan_info):
+def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
     titan_total_armor_hp = selectors.titan_total_armor_hp(titan_info)
     titan_info['total_armor_hp'] = titan_total_armor_hp
     titan_info['total_armor_hp_formatted'] = format_hp(titan_total_armor_hp)
@@ -79,7 +84,7 @@ def enhance_titan_info(titan_info):
     return titan_info
 
 
-def enhance_titan_part(titan_part_info):
+def enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
     titan_part_total_hp = selectors.titan_part_hp(titan_part_info)
     titan_part_info['total_hp_formatted'] = format_hp(titan_part_total_hp)
 
@@ -89,7 +94,7 @@ def enhance_titan_part(titan_part_info):
     return titan_part_info
 
 
-def consolidated_titan_parts(titan_info):
+def consolidated_titan_parts(titan_info: Titan) -> list[ConsolidatedTitanPart]:
     titan_parts = selectors.titan_parts(titan_info)
 
     consolidated_parts = []

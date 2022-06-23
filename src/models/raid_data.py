@@ -52,7 +52,7 @@ class EnhancedTitanPart(TitanPart):
     total_hp_formatted: StrictStr
 
 
-class ConsolidateditanPart(BaseModel):
+class ConsolidatedTitanPart(BaseModel):
     part_id: StrictStr
 
     armor_hp: int | float
@@ -77,7 +77,7 @@ class EnhancedTitan(Titan):
     skippable_hp: int | float
     skippable_hp_formatted: StrictStr
 
-    consolidated_parts: List[ConsolidateditanPart]
+    consolidated_parts: List[ConsolidatedTitanPart]
 
     cursed_parts: List[EnhancedTitanPart]
     number_of_cursed_parts: int

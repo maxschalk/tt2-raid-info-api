@@ -42,8 +42,8 @@ def mock_enhanced_titan_part() -> EnhancedTitanPart:
     )
 
 
-def mock_consolidated_titan_part() -> ConsolidateditanPart:
-    return ConsolidateditanPart(
+def mock_consolidated_titan_part() -> ConsolidatedTitanPart:
+    return ConsolidatedTitanPart(
         part_id=mock_titan_anatomy().value,
         armor_hp=choice((fake.pyfloat(), fake.pyint())),
         body_hp=choice((fake.pyfloat(), fake.pyint())),
