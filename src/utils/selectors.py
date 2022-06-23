@@ -75,7 +75,7 @@ def raid_target_hp(raid_info: dict) -> Optional[float]:
 
     titan_spawns = (titans[name] for name in spawn_sequence)
 
-    return sum(map(titan_target_hp, titan_spawns))
+    return sum(map(titan_total_hp, titan_spawns))
 
 
 # buff / debuff selectors
@@ -94,7 +94,7 @@ def titan_name(titan_info) -> Optional[str]:
     return titan_info.get("enemy_name")
 
 
-def titan_target_hp(titan_info) -> Optional[float]:
+def titan_total_hp(titan_info) -> Optional[float]:
     return titan_info.get("total_hp")
 
 
@@ -143,7 +143,7 @@ def titan_total_body_hp(titan_info) -> Optional[float]:
 
 
 def titan_skippable_hp(titan_info) -> Optional[float]:
-    return titan_total_body_hp(titan_info) - titan_target_hp(titan_info)
+    return titan_total_body_hp(titan_info) - titan_total_hp(titan_info)
 
 
 def _sum_parts_hp_with_prefix(titan_info, prefix) -> Optional[float]:

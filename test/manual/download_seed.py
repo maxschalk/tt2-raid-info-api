@@ -8,7 +8,7 @@ from test.utils.make_request import make_request_sync
 
 result = make_request_sync(
     method=requests.get,
-    path="admin/raw_seed_file/raid_seed_20220522.json",
+    path="admin/seed_file/raid_seed_20220626.json",
     stage=Stage.DEV,
 )
 

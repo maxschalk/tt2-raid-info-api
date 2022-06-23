@@ -68,6 +68,8 @@ class ConsolidatedTitanPart(BaseModel):
 class EnhancedTitan(Titan):
     parts: List[EnhancedTitanPart]
 
+    total_hp_formatted: StrictStr
+
     total_armor_hp: int | float
     total_armor_hp_formatted: StrictStr
 

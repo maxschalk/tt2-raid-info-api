@@ -58,6 +58,9 @@ def enhance_raid_info(raid_info: RaidRawSeedData) -> RaidRawSeedData:
 
 
 def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
+    titan_total_hp = selectors.titan_total_hp(titan_info)
+    titan_info['total_hp_formatted'] = format_hp(titan_total_hp)
+
     titan_total_armor_hp = selectors.titan_total_armor_hp(titan_info)
     titan_info['total_armor_hp'] = titan_total_armor_hp
     titan_info['total_armor_hp_formatted'] = format_hp(titan_total_armor_hp)

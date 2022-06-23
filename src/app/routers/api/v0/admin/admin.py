@@ -42,7 +42,7 @@ def verify_authorization(*, secret: Optional[str]):
 
 
 @router.get("/all_seed_filenames/{seed_type}", include_in_schema=DISPLAY_IN_DOCS)
-async def seed_filenames(
+async def get_seed_filenames(
         seed_type: SeedType,
         *,
         sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
@@ -78,7 +78,7 @@ async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResp
 
 
 @router.get("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
-async def create_seed_file(
+async def enhance_seed_file(
         *,
         data: list[RaidRawSeedData],
 ) -> list[RaidEnhancedSeedData]:

@@ -5,8 +5,8 @@ from test.utils.make_request import make_request_sync
 
 result = make_request_sync(
     method=requests.get,
-    path="admin/raw_seed_file/test_data_20220220.json",
-    stage=Stage.DEV
+    path="seeds/raw/most_recent",
+    stage=Stage.PRODUCTION
 )
 
-print(result)
+print(result[0])
