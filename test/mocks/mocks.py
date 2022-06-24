@@ -85,7 +85,7 @@ def mock_enhanced_titan() -> EnhancedTitan:
     )
 
 
-def _mock_raid_raw_seed_data_gen() -> Iterator[RaidRawSeedData]:
+def _mock_raid_raw_seed_data_gen() -> Iterator[RaidSeedDataRaw]:
     valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
 
     while True:
@@ -95,7 +95,7 @@ def _mock_raid_raw_seed_data_gen() -> Iterator[RaidRawSeedData]:
 
         titans = [mock_titan() for _ in range(randint(3, 10))]
 
-        yield RaidRawSeedData(
+        yield RaidSeedDataRaw(
             spawn_sequence=[
                 choice(titans).enemy_name for _ in range(randint(3, 10))
             ],
@@ -111,11 +111,11 @@ def _mock_raid_raw_seed_data_gen() -> Iterator[RaidRawSeedData]:
 MOCK_RAID_RAW_SEED_DATA_GEN = _mock_raid_raw_seed_data_gen()
 
 
-def mock_raid_raw_seed_data() -> RaidRawSeedData:
+def mock_raid_raw_seed_data() -> RaidSeedDataRaw:
     return next(MOCK_RAID_RAW_SEED_DATA_GEN)
 
 
-def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidEnhancedSeedData]:
+def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidSeedDataEnhanced]:
     valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
 
     while True:
@@ -123,7 +123,7 @@ def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidEnhancedSeedData]:
 
         expire_at = valid_from + datetime.timedelta(days=7, seconds=-1)
 
-        yield RaidEnhancedSeedData(
+        yield RaidSeedDataEnhanced(
             spawn_sequence=[fake.pystr() for _ in range(randint(3, 10))],
             raid_info_valid_from=valid_from.isoformat(),
             raid_info_expire_at=expire_at.isoformat(),
@@ -139,7 +139,7 @@ def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidEnhancedSeedData]:
 MOCK_RAID_ENHANCED_SEED_DATA_GEN = _mock_raid_enhanced_seed_data_gen()
 
 
-def mock_raid_enhanced_seed_data() -> RaidEnhancedSeedData:
+def mock_raid_enhanced_seed_data() -> RaidSeedDataEnhanced:
     return next(MOCK_RAID_ENHANCED_SEED_DATA_GEN)
 
 

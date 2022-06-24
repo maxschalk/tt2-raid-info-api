@@ -9,7 +9,7 @@ import pytest
 import requests
 from dotenv import load_dotenv
 from pydantic import ValidationError
-from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
+from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
@@ -32,7 +32,7 @@ def test_validate_stage(stage: Stage):
 
 def admin_get_all_filenames_base(
         stage: Stage,
-        posted_seeds: List[Tuple[str, RaidRawSeedData]],
+        posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
         seed_type: SeedType,
         sort_order: SortOrder = None
 ):
@@ -61,7 +61,7 @@ def admin_get_all_filenames_base(
     assert all(filename in filenames for filename, _ in posted_seeds)
 
 
-def test_admin_get_all_filenames(stage: Stage, posted_seeds: List[Tuple[str, RaidRawSeedData]]):
+def test_admin_get_all_filenames(stage: Stage, posted_seeds: List[Tuple[str, RaidSeedDataRaw]]):
     for seed_type in SeedType:
         for sort_order in (None, *SortOrder):
             admin_get_all_filenames_base(
@@ -70,7 +70,7 @@ def test_admin_get_all_filenames(stage: Stage, posted_seeds: List[Tuple[str, Rai
 
 def test_admin_download_file(
         stage: Stage,
-        posted_seeds: List[Tuple[str, RaidRawSeedData]],
+        posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
 ):
     for filename, posted_seed in posted_seeds:
         response = make_request_sync(
@@ -92,7 +92,7 @@ def test_admin_download_file(
 
 def test_seeds_all_raw_contains_posted_seeds(
         stage: Stage,
-        posted_seeds: List[Tuple[str, RaidRawSeedData]],
+        posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
 ):
     response = make_request_sync(
         method=requests.get,
@@ -111,7 +111,7 @@ def test_seeds_all_raw_contains_posted_seeds(
         assert_deep_equals(posted_seed, server_seed)
 
 
-def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: List[RaidRawSeedData]):
+def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
@@ -135,7 +135,7 @@ def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: 
         assert_deep_equals(posted_seed, server_seed)
 
 
-def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidRawSeedData]):
+def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/all_seed_filenames/{SeedType.ENHANCED.value}",
@@ -158,7 +158,7 @@ def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidRawSeedDat
 
         try:
             for raid_info in server_seed:
-                RaidEnhancedSeedData(**raid_info)
+                RaidSeedDataEnhanced(**raid_info)
         except TypeError:
             raise AssertionError
 
@@ -167,7 +167,7 @@ def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidRawSeedDat
 
 
 @pytest.mark.asyncio
-async def test_raid_info_exists(stage: Stage, posted_seeds: List[RaidRawSeedData]):
+async def test_raid_info_exists(stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
@@ -196,7 +196,7 @@ async def test_raid_info_exists(stage: Stage, posted_seeds: List[RaidRawSeedData
 
 def test_admin_delete_file(
         stage: Stage,
-        posted_seeds: List[Tuple[str, RaidRawSeedData]],
+        posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
 ):
     for filename, posted_seed in posted_seeds:
         response = make_request_sync(
@@ -211,7 +211,7 @@ def test_admin_delete_file(
 
 def test_admin_filenames_deleted(
         stage: Stage,
-        posted_seeds: List[Tuple[str, RaidRawSeedData]],
+        posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
 ):
     response = make_request_sync(
         method=requests.get,

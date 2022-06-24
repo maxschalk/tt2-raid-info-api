@@ -1,5 +1,5 @@
 import os
-from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidRawSeedData, Titan, TitanPart
+from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidSeedDataRaw, Titan, TitanPart
 
 from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                       TITAN_PARTS_ATOMIC)
@@ -42,7 +42,7 @@ def main():
         )
 
 
-def enhance_raid_info(raid_info: RaidRawSeedData) -> RaidRawSeedData:
+def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
     raid_info['raid_total_target_hp_formatted'] = format_hp(

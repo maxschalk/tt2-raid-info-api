@@ -7,7 +7,7 @@ from typing import Type
 import aiohttp
 import pytest
 import requests
-from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
+from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
@@ -18,7 +18,7 @@ BASE_PATH = "seeds"
 def seeds_all_valid_model_base(
         stage: Stage,
         seed_type: SeedType,
-        data_type: Type[RaidRawSeedData | RaidEnhancedSeedData]
+        data_type: Type[RaidSeedDataRaw | RaidSeedDataEnhanced]
 ):
     response = make_request_sync(
         method=requests.get,
@@ -37,11 +37,11 @@ def seeds_all_valid_model_base(
 
 
 def test_seeds_all_raw_valid_model(stage: Stage):
-    seeds_all_valid_model_base(stage, SeedType.RAW, RaidRawSeedData)
+    seeds_all_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
 
 
 def test_seeds_all_enhanced_valid_model(stage: Stage):
-    seeds_all_valid_model_base(stage, SeedType.ENHANCED, RaidEnhancedSeedData)
+    seeds_all_valid_model_base(stage, SeedType.ENHANCED, RaidSeedDataEnhanced)
 
 
 def seeds_all_sort_order_base(stage: Stage, seed_type: SeedType, sort_order: SortOrder = None):
@@ -97,7 +97,7 @@ def test_seeds_all_enhanced_descending(stage: Stage):
 def seeds_most_recent_valid_model_base(
         stage: Stage,
         seed_type: SeedType,
-        data_type: Type[RaidRawSeedData | RaidEnhancedSeedData]
+        data_type: Type[RaidSeedDataRaw | RaidSeedDataEnhanced]
 ):
     response = make_request_sync(
         method=requests.get,
@@ -115,12 +115,12 @@ def seeds_most_recent_valid_model_base(
 
 
 def test_seeds_most_recent_raw_valid_model(stage: Stage):
-    seeds_most_recent_valid_model_base(stage, SeedType.RAW, RaidRawSeedData)
+    seeds_most_recent_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
 
 
 def test_seeds_most_recent_enhanced_valid_model(stage: Stage):
     seeds_most_recent_valid_model_base(
-        stage, SeedType.ENHANCED, RaidEnhancedSeedData)
+        stage, SeedType.ENHANCED, RaidSeedDataEnhanced)
 
 
 @pytest.mark.asyncio

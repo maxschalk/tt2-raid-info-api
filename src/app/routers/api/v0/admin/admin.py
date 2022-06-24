@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple
 from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, Response, status
 from fastapi.responses import FileResponse
-from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
+from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
 from src.models.Stage import Stage
@@ -80,8 +80,8 @@ async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResp
 @router.get("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
 async def enhance_seed_file(
         *,
-        data: list[RaidRawSeedData],
-) -> list[RaidEnhancedSeedData]:
+        data: list[RaidSeedDataRaw],
+) -> list[RaidSeedDataEnhanced]:
 
     #  TODO TEST
 
@@ -96,7 +96,7 @@ async def enhance_seed_file(
 async def create_seed_file(
         filename: str,
         *,
-        data: List[RaidRawSeedData],
+        data: List[RaidSeedDataRaw],
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)

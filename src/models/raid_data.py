@@ -33,7 +33,7 @@ class Titan(BaseModel):
     cursed_debuffs: List[Buff] = None
 
 
-class RaidRawSeedData(BaseModel):
+class RaidSeedDataRaw(BaseModel):
     spawn_sequence: List[StrictStr]
 
     raid_info_valid_from: str
@@ -57,6 +57,9 @@ class ConsolidatedTitanPart(BaseModel):
 
     armor_hp: int | float
     body_hp: int | float
+
+    armor_hp_formatted: int | float
+    body_hp_formatted: int | float
 
     armor_cursed: bool
     body_cursed: bool
@@ -85,14 +88,14 @@ class EnhancedTitan(Titan):
     number_of_cursed_parts: int
 
 
-class RaidEnhancedSeedData(RaidRawSeedData):
+class RaidSeedDataEnhanced(RaidSeedDataRaw):
     raid_total_target_hp: int | float
     raid_total_target_hp_formatted: StrictStr
 
     titans: List[EnhancedTitan]
 
 
-RaidSeedData = RaidRawSeedData | RaidEnhancedSeedData
+RaidSeedData = RaidSeedDataRaw | RaidSeedDataEnhanced
 
 # SAMPLE
 """

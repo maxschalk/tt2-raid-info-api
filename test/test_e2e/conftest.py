@@ -6,13 +6,13 @@ from typing import List, Tuple
 import pytest
 import requests
 from pydantic import BaseModel
-from src.models.raid_data import RaidRawSeedData
+from src.models.raid_data import RaidSeedDataRaw
 from src.models.Stage import Stage
 from src.utils import selectors
 
 
 @pytest.fixture(scope="module", autouse=True)
-def posted_seeds(stage: Stage) -> List[Tuple[str, RaidRawSeedData]]:
+def posted_seeds(stage: Stage) -> List[Tuple[str, RaidSeedDataRaw]]:
     mocked_seeds = [[mock_raid_raw_seed_data() for _ in range(140)]
                     for _ in range(2)]
 

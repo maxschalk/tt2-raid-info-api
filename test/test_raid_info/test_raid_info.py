@@ -3,7 +3,7 @@ from test.utils.make_request import make_request_async
 
 import aiohttp
 import pytest
-from src.models.raid_data import RaidEnhancedSeedData, RaidRawSeedData
+from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.models.SeedType import SeedType
 from src.models.Stage import Stage
 
@@ -13,8 +13,8 @@ BASE_PATH = "raid_info"
 @pytest.mark.asyncio
 async def test_raid_info_valid_model(stage: Stage):
     cases = (
-        (SeedType.RAW, RaidRawSeedData),
-        (SeedType.ENHANCED, RaidEnhancedSeedData)
+        (SeedType.RAW, RaidSeedDataRaw),
+        (SeedType.ENHANCED, RaidSeedDataEnhanced)
     )
 
     for seed_type, data_type in cases:
