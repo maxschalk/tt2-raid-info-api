@@ -111,7 +111,7 @@ def test_seeds_all_raw_contains_posted_seeds(
         assert_deep_equals(posted_seed, server_seed)
 
 
-def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
+def test_seeds_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
@@ -123,7 +123,7 @@ def test_seeds_most_recent_raw_contains_posted_seed(stage: Stage, posted_seeds: 
     for i, (_, posted_seed) in enumerate(posted_seeds):
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}/most_recent?offset_weeks={files_count - 1 - i}",
+            path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}/recent?offset_weeks={files_count - 1 - i}",
             stage=stage,
             parse_response=False
         )
@@ -147,7 +147,7 @@ def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: List[RaidSeedDataRa
     for i, (_, posted_seed) in enumerate(posted_seeds):
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_SEEDS}/{SeedType.ENHANCED.value}/most_recent?offset_weeks={files_count - 1 - i}",
+            path=f"{BASE_PATH_SEEDS}/{SeedType.ENHANCED.value}/recent?offset_weeks={files_count - 1 - i}",
             stage=stage,
             parse_response=False
         )

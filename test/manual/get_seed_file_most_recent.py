@@ -5,7 +5,7 @@ from test.utils.make_request import make_request_sync
 
 result = make_request_sync(
     method=requests.get,
-    path="seeds/raw/most_recent",
+    path="seeds/raw/recent",
     stage=Stage.PRODUCTION
 )
 

@@ -13,7 +13,7 @@ from src.scripts.enhance_seeds import enhance_raid_info, main as enhance_seeds
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import \
-    delete_raw_seed_file as fs_delete_raw_seed_file
+    fs_delete_raw_seed_file as fs_delete_raw_seed_file
 from src.utils.seed_data_fs_interface import \
     dump_seed_data as fs_dump_seed_data
 from src.utils.seed_data_fs_interface import \
@@ -54,7 +54,7 @@ async def get_seed_filenames(
 
 
 @router.get("/seed_file/{seed_type}/{filename}", include_in_schema=DISPLAY_IN_DOCS)
-async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResponse:
+async def download_seed_file(seed_type: SeedType, filename: str) -> FileResponse:
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
@@ -69,7 +69,7 @@ async def download_raw_seed_file(seed_type: SeedType, filename: str) -> FileResp
         )
 
     try:
-        return FileResponse(filepath, media_type='application/json', filename=filename)
+        return FileResponse(filepath, media_type='application/json', filename=f"{seed_type.value}_{filename}")
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

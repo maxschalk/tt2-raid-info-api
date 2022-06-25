@@ -60,28 +60,37 @@ def fs_get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.
     )
 
 
-def fs_get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optional[List[RaidSeedData]]:
+def fs_get_seed_filename_by_recency(*, dir_path: str, offset_weeks: int = 0) -> str:
     offset_weeks = abs(offset_weeks)
 
-    most_recent_filepaths = get_sorted_seed_filenames(
+    recent_filepaths = get_sorted_seed_filenames(
         dir_path=dir_path, sort_order=SortOrder.DESCENDING
     )
 
-    if offset_weeks >= len(most_recent_filepaths):
+    if offset_weeks >= len(recent_filepaths):
         return None
 
     selected_filepath = os.path.join(
-        dir_path, most_recent_filepaths[offset_weeks]
+        dir_path, recent_filepaths[offset_weeks]
+    )
+
+    return selected_filepath
+
+
+def fs_get_seed_data_by_recency(*, dir_path: str, offset_weeks: int = 0) -> Optional[List[RaidSeedData]]:
+
+    selected_filepath = fs_get_seed_filename_by_recency(
+        dir_path=dir_path, offset_weeks=offset_weeks
     )
 
     return load_seed_data(filepath=selected_filepath)
 
 
-def get_most_recent_seed_data(*, dir_path: str) -> List[RaidSeedData]:
+def fs_get_recent_seed_data(*, dir_path: str) -> List[RaidSeedData]:
     return fs_get_seed_data_by_recency(dir_path=dir_path, offset_weeks=0)
 
 
-def delete_raw_seed_file(*, filename: str) -> bool:
+def fs_delete_raw_seed_file(*, filename: str) -> bool:
     file_path = os.path.join(RAW_SEEDS_DIR, filename)
 
     if not os.path.exists(file_path):

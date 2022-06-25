@@ -94,14 +94,14 @@ def test_seeds_all_enhanced_descending(stage: Stage):
     seeds_all_sort_order_base(stage, SeedType.ENHANCED, SortOrder.DESCENDING)
 
 
-def seeds_most_recent_valid_model_base(
+def seeds_recent_valid_model_base(
         stage: Stage,
         seed_type: SeedType,
         data_type: Type[RaidSeedDataRaw | RaidSeedDataEnhanced]
 ):
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH}/{seed_type.value}/most_recent",
+        path=f"{BASE_PATH}/{seed_type.value}/recent",
         stage=stage,
         parse_response=False
     )
@@ -114,17 +114,17 @@ def seeds_most_recent_valid_model_base(
         data_type(**raid_info)
 
 
-def test_seeds_most_recent_raw_valid_model(stage: Stage):
-    seeds_most_recent_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
+def test_seeds_recent_raw_valid_model(stage: Stage):
+    seeds_recent_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
 
 
-def test_seeds_most_recent_enhanced_valid_model(stage: Stage):
-    seeds_most_recent_valid_model_base(
+def test_seeds_recent_enhanced_valid_model(stage: Stage):
+    seeds_recent_valid_model_base(
         stage, SeedType.ENHANCED, RaidSeedDataEnhanced)
 
 
 @pytest.mark.asyncio
-async def test_seeds_most_recent_get_descending_seeds(stage: Stage):
+async def test_seeds_recent_get_descending_seeds(stage: Stage):
     for seed_type in SeedType:
         all_server_seeds = make_request_sync(
             method=requests.get,
@@ -134,7 +134,7 @@ async def test_seeds_most_recent_get_descending_seeds(stage: Stage):
         ).json()
 
         paths = tuple(
-            f"{BASE_PATH}/{seed_type.value}/most_recent?offset_weeks={i}"
+            f"{BASE_PATH}/{seed_type.value}/recent?offset_weeks={i}"
             for i, _ in enumerate(all_server_seeds)
         )
 
