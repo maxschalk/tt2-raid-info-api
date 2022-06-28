@@ -57,7 +57,7 @@ async def get_seed_filenames(
 
 
 @router.get("/seed_file/{seed_type}/{filename}", include_in_schema=DISPLAY_IN_DOCS)
-async def download_seed_file(seed_type: SeedType, filename: str, *) -> FileResponse:
+async def download_seed_file(seed_type: SeedType, filename: str) -> FileResponse:
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
