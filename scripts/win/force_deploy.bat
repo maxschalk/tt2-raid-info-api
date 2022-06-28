@@ -1,4 +1,4 @@
-IF "%1"=="" (
+IF [%1]==[] (
     SET "CommitMessage=automated: :rocket: force deploy from dev"
 ) ELSE (
     SET "CommitMessage=%1"

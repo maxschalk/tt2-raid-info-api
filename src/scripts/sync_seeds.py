@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import shutil
@@ -8,7 +9,7 @@ from src.models.SeedType import SeedType
 from src.models.Stage import Stage
 from src.PATHS import RAW_SEEDS_DIR
 from src.scripts.enhance_seeds import main as enhance_seeds
-from src.utils.seed_data_fs_interface import (get_all_seed_filenames,
+from src.utils.seed_data_fs_interface import (dump_seed_data, get_all_seed_filenames,
                                               load_seed_data)
 
 STAGE = Stage.PRODUCTION
@@ -67,9 +68,11 @@ def down():
 
         print(f"-- creating {filename}")
 
+        filepath = os.path.join(RAW_SEEDS_DIR, filename)
+        data = response.json()
+
         try:
-            with open(os.path.join(RAW_SEEDS_DIR, filename), 'wb') as f:
-                shutil.copyfileobj(response.raw, f)
+            dump_seed_data(filepath=filepath, data=data)
         except Exception as e:
             print(f"Error when creating '{filename}': {e}")
 
@@ -128,12 +131,14 @@ def up():
 def main():
     up_down = input("Sync (U)p or (D)own? Anything else aborts | U/D/* > ")
 
-    if up_down.upper() == 'D':
-        down()
-        return
-
-    if up_down.upper() == 'U':
-        up()
+    match up_down.upper():
+        case 'D':
+            return down()
+        case 'U':
+            return up()
+        case s:
+            print(f"aborted with {s}")
+            return
 
 
 if __name__ == "__main__":
