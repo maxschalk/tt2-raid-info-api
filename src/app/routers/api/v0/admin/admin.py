@@ -57,7 +57,7 @@ async def get_seed_filenames(
 
 
 @router.get("/seed_file/{seed_type}/{filename}", include_in_schema=DISPLAY_IN_DOCS)
-async def download_seed_file(seed_type: SeedType, filename: str, *, download: bool = True) -> FileResponse:
+async def download_seed_file(seed_type: SeedType, filename: str, *) -> FileResponse:
     if not filename.endswith(".json"):
         filename = f"{filename}.json"
 
@@ -72,10 +72,8 @@ async def download_seed_file(seed_type: SeedType, filename: str, *, download: bo
         )
 
     try:
-        if download:
-            return FileResponse(filepath, media_type='application/json', filename=f"{seed_type.value}_{filename}")
+        return FileResponse(filepath, media_type='application/json', filename=f"{seed_type.value}_{filename}")
 
-        return load_seed_data(filepath)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
