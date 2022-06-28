@@ -1,9 +1,12 @@
+import io
+import json
 import os
 from typing import Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Header, HTTPException, Response, status
-from fastapi.responses import FileResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, Header, HTTPException, status
+from fastapi.responses import FileResponse, StreamingResponse
 from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.models.SeedType import SeedType
 from src.models.SortOrder import SortOrder
@@ -77,17 +80,31 @@ async def download_seed_file(seed_type: SeedType, filename: str) -> FileResponse
         )
 
 
-@router.get("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
+@router.post("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
 async def enhance_seed_file(
         *,
+        download: bool = False,
         data: list[RaidSeedDataRaw],
 ) -> list[RaidSeedDataEnhanced]:
 
     #  TODO TEST
 
     enhanced_seed_data = list(
-        map(enhance_raid_info, data)
+        map(enhance_raid_info, jsonable_encoder(data))
     )
+
+    if download:
+        stream = io.StringIO()
+
+        json.dump(enhanced_seed_data, stream)
+
+        return StreamingResponse(
+            iter([stream.getvalue()]),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": "attachment; filename=enhanced_custom_seed.json"
+            }
+        )
 
     return enhanced_seed_data
 
@@ -96,7 +113,7 @@ async def enhance_seed_file(
 async def create_seed_file(
         filename: str,
         *,
-        data: List[RaidSeedDataRaw],
+        data: list[RaidSeedDataRaw],
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)

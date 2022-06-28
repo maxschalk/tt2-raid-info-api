@@ -10,7 +10,7 @@ with open(f"./test/manual/test_data_20220220.json", 'r') as file:
 
 result = make_request_sync(
     method=requests.post,
-    path="admin/raw_seed_file/test_data_20220220.json",
+    path="admin/enhance_seed?download=true",
     data=json.dumps(seed_data),
     stage=Stage.DEV
 )
