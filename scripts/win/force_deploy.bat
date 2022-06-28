@@ -2,7 +2,7 @@ git checkout dev
 
 git add .
 
-git commit -am "automatic: force deploy from dev"
+git commit -am "automated: :rocket: force deploy from dev"
 
 git checkout main
 
