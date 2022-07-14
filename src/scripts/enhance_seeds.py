@@ -109,10 +109,10 @@ def consolidated_titan_parts(titan_info: Titan) -> list[ConsolidatedTitanPart]:
             "part_id": part_id,
 
             "armor_hp": 0,
-            "armor_hp_formatted": 0,
+            "armor_hp_formatted": "0",
 
             "body_hp": 0,
-            "body_hp_formatted": 0,
+            "body_hp_formatted": "0",
 
             "armor_cursed": False,
             "body_cursed": False,
