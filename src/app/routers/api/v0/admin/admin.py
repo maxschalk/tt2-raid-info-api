@@ -85,12 +85,12 @@ async def download_seed_file(seed_type: SeedType, filename: str) -> FileResponse
 async def enhance_seed_file(
         *,
         download: bool = False,
-        data: list[RaidSeedDataRaw],
-) -> list[RaidSeedDataEnhanced]:
+        data: List[RaidSeedDataRaw],
+) -> List[RaidSeedDataEnhanced]:
 
     #  TODO TEST
 
-    enhanced_seed_data = list(
+    enhanced_seed_data = List(
         map(enhance_raid_info, jsonable_encoder(data))
     )
 
@@ -114,7 +114,7 @@ async def enhance_seed_file(
 async def create_seed_file(
         filename: str,
         *,
-        data: list[RaidSeedDataRaw],
+        data: List[RaidSeedDataRaw],
         secret: Optional[str] = Header(None)
 ) -> Dict:
     verify_authorization(secret=secret)

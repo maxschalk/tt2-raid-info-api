@@ -44,7 +44,7 @@ def dump_seed_data(*, filepath: str, data: List[RaidSeedData]) -> bool:
     return True
 
 
-def get_all_seed_data(*, dir_path: str) -> tuple[List[RaidSeedData]]:
+def get_all_seed_data(*, dir_path: str) -> Tuple[List[RaidSeedData]]:
     return tuple(
         load_seed_data(filepath=os.path.join(dir_path, filepath))
         for filepath
@@ -52,7 +52,7 @@ def get_all_seed_data(*, dir_path: str) -> tuple[List[RaidSeedData]]:
     )
 
 
-def fs_get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> tuple[List[RaidSeedData]]:
+def fs_get_sorted_seed_data(*, dir_path: str, sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[List[RaidSeedData]]:
     return tuple(
         load_seed_data(filepath=os.path.join(dir_path, filepath))
         for filepath

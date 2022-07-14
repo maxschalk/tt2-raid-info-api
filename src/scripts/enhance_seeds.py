@@ -1,4 +1,5 @@
 import os
+from typing import List
 from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidSeedDataRaw, Titan, TitanPart
 
 from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
@@ -97,7 +98,7 @@ def enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
     return titan_part_info
 
 
-def consolidated_titan_parts(titan_info: Titan) -> list[ConsolidatedTitanPart]:
+def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
     titan_parts = selectors.titan_parts(titan_info)
 
     consolidated_parts = []
