@@ -2,7 +2,7 @@ import asyncio
 import operator
 import unittest
 from test.utils.make_request import make_request_async, make_request_sync
-from typing import Type
+from typing import Type, Union
 
 import aiohttp
 import pytest
@@ -18,7 +18,7 @@ BASE_PATH = "seeds"
 def seeds_all_valid_model_base(
         stage: Stage,
         seed_type: SeedType,
-        data_type: Type[RaidSeedDataRaw | RaidSeedDataEnhanced]
+        data_type: Type[Union[RaidSeedDataRaw, RaidSeedDataEnhanced]]
 ):
     response = make_request_sync(
         method=requests.get,
@@ -97,7 +97,7 @@ def test_seeds_all_enhanced_descending(stage: Stage):
 def seeds_recent_valid_model_base(
         stage: Stage,
         seed_type: SeedType,
-        data_type: Type[RaidSeedDataRaw | RaidSeedDataEnhanced]
+        data_type: Type[Union[RaidSeedDataRaw, RaidSeedDataEnhanced]]
 ):
     response = make_request_sync(
         method=requests.get,

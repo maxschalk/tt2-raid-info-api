@@ -1,4 +1,7 @@
-def format_hp(hp: int | float):
+from typing import Union
+
+
+def format_hp(hp: Union[int, float]):
     thousands_units = ["K", "M", "B", "T", "Q"]
     unit = ""
 

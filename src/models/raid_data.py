@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, StrictStr
 from src.models.titan_anatomy import TitanAnatomy
@@ -55,11 +55,11 @@ class EnhancedTitanPart(TitanPart):
 class ConsolidatedTitanPart(BaseModel):
     part_id: StrictStr
 
-    armor_hp: int | float
-    body_hp: int | float
+    armor_hp: Union[int, float]
+    body_hp: Union[int, float]
 
-    armor_hp_formatted: int | float
-    body_hp_formatted: int | float
+    armor_hp_formatted: StrictStr
+    body_hp_formatted: StrictStr
 
     armor_cursed: bool
     body_cursed: bool
@@ -73,13 +73,13 @@ class EnhancedTitan(Titan):
 
     total_hp_formatted: StrictStr
 
-    total_armor_hp: int | float
+    total_armor_hp: Union[int, float]
     total_armor_hp_formatted: StrictStr
 
-    total_body_hp: int | float
+    total_body_hp: Union[int, float]
     total_body_hp_formatted: StrictStr
 
-    skippable_hp: int | float
+    skippable_hp: Union[int, float]
     skippable_hp_formatted: StrictStr
 
     consolidated_parts: List[ConsolidatedTitanPart]
@@ -89,13 +89,13 @@ class EnhancedTitan(Titan):
 
 
 class RaidSeedDataEnhanced(RaidSeedDataRaw):
-    raid_total_target_hp: int | float
+    raid_total_target_hp: Union[int, float]
     raid_total_target_hp_formatted: StrictStr
 
     titans: List[EnhancedTitan]
 
 
-RaidSeedData = RaidSeedDataRaw | RaidSeedDataEnhanced
+RaidSeedData = Union[RaidSeedDataRaw, RaidSeedDataEnhanced]
 
 # SAMPLE
 """
