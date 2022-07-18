@@ -28,8 +28,7 @@ load_dotenv()
 ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
 ENV_STAGE = os.getenv('STAGE')
 
-DISPLAY_IN_DOCS = True
-# DISPLAY_IN_DOCS = ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
+DISPLAY_IN_DOCS = True # ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
 
 router = APIRouter(
     prefix="/admin",
