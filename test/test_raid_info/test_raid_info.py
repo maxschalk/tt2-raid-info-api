@@ -12,21 +12,19 @@ BASE_PATH = "raid_info"
 
 @pytest.mark.asyncio
 async def test_raid_info_valid_model(stage: Stage):
-    cases = (
-        (SeedType.RAW, RaidSeedDataRaw),
-        (SeedType.ENHANCED, RaidSeedDataEnhanced)
-    )
+    cases = ((SeedType.RAW, RaidSeedDataRaw), (SeedType.ENHANCED,
+                                               RaidSeedDataEnhanced))
 
     for seed_type, data_type in cases:
-        paths = tuple(
-            f"{BASE_PATH}/{seed_type.value}/{tier}/1"
-            for tier in range(1, 5)
-        )
+        paths = tuple(f"{BASE_PATH}/{seed_type.value}/{tier}/1"
+                      for tier in range(1, 5))
 
         async with aiohttp.ClientSession() as session:
-            raid_infos = await asyncio.gather(
-                *map(lambda p: make_request_async(stage=stage, method=session.get, path=p, response_json=True), paths)
-            )
+            raid_infos = await asyncio.gather(*map(
+                lambda p: make_request_async(stage=stage,
+                                             method=session.get,
+                                             path=p,
+                                             response_json=True), paths))
 
         for raid_info in raid_infos:
             data_type(**raid_info)
@@ -38,31 +36,25 @@ async def test_raid_info_invalid_tier_level(stage: Stage):
         (-1, 1),
         (-1, 0),
         (-1, -1),
-
         (0, 1),
         (0, 0),
         (0, -1),
-
         (5, 1),
         (5, 0),
         (5, -1),
-
         (1, 90),
         (2, 90),
         (3, 90),
         (4, 90),
     )
 
-    paths = tuple(
-        f"{BASE_PATH}/{seed_type.value}/{tier}/{level}"
-        for (tier, level) in cases
-        for seed_type in SeedType
-    )
+    paths = tuple(f"{BASE_PATH}/{seed_type.value}/{tier}/{level}"
+                  for (tier, level) in cases for seed_type in SeedType)
 
     async with aiohttp.ClientSession() as session:
-        responses = await asyncio.gather(
-            *map(lambda p: make_request_async(stage=stage, method=session.get, path=p), paths)
-        )
+        responses = await asyncio.gather(*map(
+            lambda p: make_request_async(
+                stage=stage, method=session.get, path=p), paths))
 
         for response in responses:
             assert response.status == 400

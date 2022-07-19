@@ -1,10 +1,9 @@
-from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-
 from src.app.routers import api
 from src.models.Stage import Stage
 
@@ -25,13 +24,13 @@ app = FastAPI(
     }
 )
 
-origins = [
+cors_origins = [
     "*"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

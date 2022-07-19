@@ -15,10 +15,7 @@ random.seed(0)
 
 
 def mock_buff() -> Buff:
-    return Buff(
-        bonus_type=fake.pystr(),
-        bonus_amount=fake.pyfloat()
-    )
+    return Buff(bonus_type=fake.pystr(), bonus_amount=fake.pyfloat())
 
 
 def mock_titan_anatomy() -> TitanAnatomy:
@@ -26,41 +23,35 @@ def mock_titan_anatomy() -> TitanAnatomy:
 
 
 def mock_titan_part() -> TitanPart:
-    return TitanPart(
-        part_id=mock_titan_anatomy().value,
-        total_hp=fake.pyfloat(),
-        cursed=fake.pybool()
-    )
+    return TitanPart(part_id=mock_titan_anatomy().value,
+                     total_hp=fake.pyfloat(),
+                     cursed=fake.pybool())
 
 
 def mock_enhanced_titan_part() -> EnhancedTitanPart:
-    return EnhancedTitanPart(
-        part_id=mock_titan_anatomy().value,
-        total_hp=fake.pyfloat(),
-        cursed=fake.pybool(),
-        total_hp_formatted=fake.pystr()
-    )
+    return EnhancedTitanPart(part_id=mock_titan_anatomy().value,
+                             total_hp=fake.pyfloat(),
+                             cursed=fake.pybool(),
+                             total_hp_formatted=fake.pystr())
 
 
 def mock_consolidated_titan_part() -> ConsolidatedTitanPart:
-    return ConsolidatedTitanPart(
-        part_id=mock_titan_anatomy().value,
-        armor_hp=choice((fake.pyfloat(), fake.pyint())),
-        body_hp=choice((fake.pyfloat(), fake.pyint())),
-        armor_cursed=fake.pybool(),
-        body_cursed=fake.pybool()
-    )
+    return ConsolidatedTitanPart(part_id=mock_titan_anatomy().value,
+                                 armor_hp=choice(
+                                     (fake.pyfloat(), fake.pyint())),
+                                 body_hp=choice(
+                                     (fake.pyfloat(), fake.pyint())),
+                                 armor_cursed=fake.pybool(),
+                                 body_cursed=fake.pybool())
 
 
 def mock_titan() -> Titan:
-    return Titan(
-        enemy_id=fake.pystr(),
-        enemy_name=fake.pystr(),
-        total_hp=fake.pyfloat(),
-        parts=[mock_titan_part() for _ in range(randint(0, 3))],
-        area_debuffs=[mock_buff() for _ in range(randint(0, 3))],
-        cursed_debuffs=[mock_buff() for _ in range(randint(0, 3))]
-    )
+    return Titan(enemy_id=fake.pystr(),
+                 enemy_name=fake.pystr(),
+                 total_hp=fake.pyfloat(),
+                 parts=[mock_titan_part() for _ in range(randint(0, 3))],
+                 area_debuffs=[mock_buff() for _ in range(randint(0, 3))],
+                 cursed_debuffs=[mock_buff() for _ in range(randint(0, 3))])
 
 
 def mock_enhanced_titan() -> EnhancedTitan:
@@ -77,12 +68,13 @@ def mock_enhanced_titan() -> EnhancedTitan:
         total_body_hp_formatted=fake.pystr(),
         skippable_hp=choice((fake.pyfloat(), fake.pyint())),
         skippable_hp_formatted=fake.pystr(),
-        consolidated_parts=[mock_consolidated_titan_part()
-                            for _ in range(randint(3, 10))],
-        cursed_parts=[mock_enhanced_titan_part()
-                      for _ in range(randint(3, 10))],
-        number_of_cursed_parts=fake.pyint()
-    )
+        consolidated_parts=[
+            mock_consolidated_titan_part() for _ in range(randint(3, 10))
+        ],
+        cursed_parts=[
+            mock_enhanced_titan_part() for _ in range(randint(3, 10))
+        ],
+        number_of_cursed_parts=fake.pyint())
 
 
 def _mock_raid_raw_seed_data_gen() -> Iterator[RaidSeedDataRaw]:
@@ -104,8 +96,7 @@ def _mock_raid_raw_seed_data_gen() -> Iterator[RaidSeedDataRaw]:
             tier=str(fake.unique.pyint()),
             level=str(fake.unique.pyint()),
             titans=titans,
-            area_buffs=[mock_buff() for _ in range(randint(3, 10))]
-        )
+            area_buffs=[mock_buff() for _ in range(randint(3, 10))])
 
 
 MOCK_RAID_RAW_SEED_DATA_GEN = _mock_raid_raw_seed_data_gen()
@@ -132,8 +123,7 @@ def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidSeedDataEnhanced]:
             area_buffs=[mock_buff() for _ in range(randint(3, 10))],
             raid_total_target_hp=choice((fake.pyfloat(), fake.pyint())),
             raid_total_target_hp_formatted=fake.pystr(),
-            titans=[mock_enhanced_titan() for _ in range(randint(3, 10))]
-        )
+            titans=[mock_enhanced_titan() for _ in range(randint(3, 10))])
 
 
 MOCK_RAID_ENHANCED_SEED_DATA_GEN = _mock_raid_enhanced_seed_data_gen()

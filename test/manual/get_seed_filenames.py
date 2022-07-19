@@ -7,15 +7,13 @@ from src.models.Stage import Stage
 result = make_request_sync(
     method=requests.get,
     path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-    stage=Stage.PRODUCTION
-)
+    stage=Stage.PRODUCTION)
 
 print("RAW:", result)
 
 result = make_request_sync(
     method=requests.get,
     path=f"admin/all_seed_filenames/{SeedType.ENHANCED.value}",
-    stage=Stage.PRODUCTION
-)
+    stage=Stage.PRODUCTION)
 
 print("ENHANCED:", result)

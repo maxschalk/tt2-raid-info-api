@@ -10,15 +10,16 @@ from test.utils.make_request import make_request_sync
 BASE_PATH = "admin"
 
 
-def get_all_filenames_base(stage: Stage, seed_type: SeedType, sort_order: SortOrder = None):
+def get_all_filenames_base(stage: Stage,
+                           seed_type: SeedType,
+                           sort_order: SortOrder = None):
     qs = "" if sort_order is None else f"?sort_order={sort_order.value}"
 
     response = make_request_sync(
         method=requests.get,
         path=f"{BASE_PATH}/all_seed_filenames/{seed_type.value}{qs}",
         stage=stage,
-        parse_response=False
-    )
+        parse_response=False)
 
     assert response.status_code == 200
 
