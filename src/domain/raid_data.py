@@ -1,7 +1,6 @@
 from typing import List, Optional, Union
 
 from pydantic import BaseModel, StrictStr
-from src.domain.titan_anatomy import TitanAnatomy
 
 
 class RaidDataFile(BaseModel):
