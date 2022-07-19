@@ -30,7 +30,7 @@ def get_sorted_seed_filenames(
 
 
 def load_seed_data(*, filepath: str) -> List[RaidSeedData]:
-    with open(filepath, 'r') as file:
+    with open(filepath, mode='r', encoding='utf-8') as file:
         return json.load(file)
 
 
@@ -38,7 +38,7 @@ def dump_seed_data(*, filepath: str, data: List[RaidSeedData]) -> bool:
     if os.path.exists(filepath):
         return False
 
-    with open(filepath, 'w') as file:
+    with open(filepath, mode='w', encoding='utf-8') as file:
         json.dump(jsonable_encoder(data), file)
 
     return True

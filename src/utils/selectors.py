@@ -2,7 +2,8 @@ from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Optional, Tuple
 
-import src.domain.titan_anatomy as titan_anatomy
+from src.domain import titan_anatomy
+from src.domain.raid_data import TitanPart
 from src.domain.validator_bin_op import ValidatorBinOp
 from src.utils.safe_parse import (safe_parse_datetime, safe_parse_float,
                                   safe_parse_int)
@@ -119,8 +120,11 @@ def titan_cursed_debuffs(titan_info) -> List[Dict]:
 
 
 def titan_cursed_parts(titan_info) -> Tuple[Dict]:
-    return tuple(
-        filter(lambda part: titan_part_cursed(part), titan_parts(titan_info)))
+
+    def predicate_cursed(titan_part: TitanPart):
+        return titan_part_cursed(titan_part)
+
+    return tuple(filter(predicate_cursed, titan_parts(titan_info)))
 
 
 def titan_part_by_name(titan_info, part_id) -> Optional[Dict]:
@@ -139,7 +143,7 @@ def titan_subparts_by_object(
         raise ValueError("Incorrect part object provided")
 
     if isinstance(part_object, str):
-        return titan_part_by_name(titan_info, f"{prefix}{part_object}"),
+        return titan_part_by_name(titan_info, f"{prefix}{part_object}")
 
     return tuple(
         map(lambda part: titan_part_by_name(titan_info, f"{prefix}{part}"),
