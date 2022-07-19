@@ -5,9 +5,9 @@ from os.path import isfile, join
 from typing import Iterator, List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
-from src.models.raid_data import RaidSeedData
-from src.models.SortOrder import SortOrder
-from src.PATHS import RAW_SEEDS_DIR
+from src.domain.raid_data import RaidSeedData
+from src.domain.sort_order import SortOrder
+from src.paths import RAW_SEEDS_DIR
 
 
 def _seed_path_generator(*, dir_path: str) -> Iterator[str]:

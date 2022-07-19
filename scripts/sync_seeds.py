@@ -3,10 +3,10 @@ import os
 from test.utils.make_request import make_request_sync
 
 import requests
+from src.domain.seed_type import SeedType
+from src.domain.stage import Stage
 from src.enhance_seeds import main as enhance_seeds
-from src.models.SeedType import SeedType
-from src.models.Stage import Stage
-from src.PATHS import RAW_SEEDS_DIR
+from src.paths import RAW_SEEDS_DIR
 from src.utils.seed_data_fs_interface import (dump_seed_data,
                                               get_all_seed_filenames,
                                               load_seed_data)

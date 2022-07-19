@@ -1,5 +1,5 @@
-from src.models.SeedType import SeedType
-from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
+from src.domain.seed_type import SeedType
+from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 
 
 def get_seeds_dir_path(seed_type: SeedType):

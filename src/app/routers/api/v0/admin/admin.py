@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, StreamingResponse
-from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
-from src.models.SeedType import SeedType
-from src.models.SortOrder import SortOrder
-from src.models.Stage import Stage
-from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
-from src.scripts.enhance_seeds import enhance_raid_info
-from src.scripts.enhance_seeds import main as enhance_seeds
+from src.domain.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.domain.seed_type import SeedType
+from src.domain.sort_order import SortOrder
+from src.domain.stage import Stage
+from src.enhance_seeds import enhance_raid_info
+from src.enhance_seeds import main as enhance_seeds
+from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.seed_data_fs_interface import \

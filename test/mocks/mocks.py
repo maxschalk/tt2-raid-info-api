@@ -1,12 +1,11 @@
 import datetime
 import random
-from random import randint, choice
+from random import choice, randint
 from typing import Iterator
 
 from faker import Faker
-
-from src.models.raid_data import *
-from src.models.titan_anatomy import *
+from src.domain.raid_data import *
+from src.domain.titan_anatomy import *
 
 fake = Faker()
 Faker.seed(0)

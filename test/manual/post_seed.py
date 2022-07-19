@@ -1,9 +1,8 @@
 import json
+from test.utils.make_request import make_request_sync
 
 import requests
-
-from src.models.Stage import Stage
-from test.utils.make_request import make_request_sync
+from src.domain.stage import Stage
 
 with open(f"./test/manual/test_data_20220220.json", 'r') as file:
     seed_data = json.load(file)

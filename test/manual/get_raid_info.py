@@ -1,10 +1,9 @@
 import json
+from test.utils.make_request import make_request_sync
 
 import requests
-
-from src.models.SeedType import SeedType
-from src.models.Stage import Stage
-from test.utils.make_request import make_request_sync
+from src.domain.seed_type import SeedType
+from src.domain.stage import Stage
 
 result = make_request_sync(method=requests.get,
                            path=f"raid_info/{SeedType.ENHANCED.value}/4/10",

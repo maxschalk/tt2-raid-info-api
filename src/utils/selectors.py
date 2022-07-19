@@ -2,8 +2,8 @@ from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Optional, Tuple
 
-import src.models.titan_anatomy as titan_anatomy
-from src.models.ValidatorBinOp import ValidatorBinOp
+import src.domain.titan_anatomy as titan_anatomy
+from src.domain.validator_bin_op import ValidatorBinOp
 from src.utils.safe_parse import (safe_parse_datetime, safe_parse_float,
                                   safe_parse_int)
 

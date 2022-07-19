@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
-from src.models.raid_data import RaidSeedData
-from src.models.SeedType import SeedType
-from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
+from src.domain.raid_data import RaidSeedData
+from src.domain.seed_type import SeedType
+from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND

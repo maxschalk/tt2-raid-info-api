@@ -2,7 +2,7 @@ import os
 
 import requests
 from dotenv import load_dotenv
-from src.models.Stage import Stage
+from src.domain.stage import Stage
 
 load_dotenv()
 

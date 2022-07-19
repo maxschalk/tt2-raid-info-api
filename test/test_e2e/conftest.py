@@ -6,8 +6,8 @@ from typing import List, Tuple
 import pytest
 import requests
 from pydantic import BaseModel
-from src.models.raid_data import RaidSeedDataRaw
-from src.models.Stage import Stage
+from src.domain.raid_data import RaidSeedDataRaw
+from src.domain.stage import Stage
 from src.utils import selectors
 
 

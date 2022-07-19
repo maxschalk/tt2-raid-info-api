@@ -7,10 +7,10 @@ from typing import Type, Union
 import aiohttp
 import pytest
 import requests
-from src.models.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
-from src.models.SeedType import SeedType
-from src.models.SortOrder import SortOrder
-from src.models.Stage import Stage
+from src.domain.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.domain.seed_type import SeedType
+from src.domain.sort_order import SortOrder
+from src.domain.stage import Stage
 
 BASE_PATH = "seeds"
 

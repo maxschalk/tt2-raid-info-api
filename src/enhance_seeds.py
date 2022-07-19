@@ -1,10 +1,12 @@
 import os
 from typing import List
-from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidSeedDataRaw, Titan, TitanPart
 
-from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
+from src.domain.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
+                                  EnhancedTitanPart, RaidSeedDataRaw, Titan,
+                                  TitanPart)
+from src.domain.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                       TITAN_PARTS_ATOMIC)
-from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
+from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
 from src.utils.format_hp import format_hp
 from src.utils.seed_data_fs_interface import (dump_seed_data,

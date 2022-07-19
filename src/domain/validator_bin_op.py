@@ -1,5 +1,4 @@
 from enum import Enum
-
 from operator import and_, or_, xor
 
 

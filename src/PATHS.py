@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.models.SeedType import SeedType
+from src.domain.seed_type import SeedType
 
 ROOT_DIR = Path(__file__).parent.parent
 
