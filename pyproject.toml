@@ -2,5 +2,6 @@
 
 disable = [
     "missing-docstring",
-    "broad-except"
+    "broad-except",
+    "too-few-public-methods"
 ]
