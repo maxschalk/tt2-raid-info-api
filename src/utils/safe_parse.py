@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import Optional, Callable, Any
 
 
-def _safe_parse_base(from_str: str, constructor: Callable, default: Any = None) -> Optional[Any]:
+def _safe_parse_base(from_str: str,
+                     constructor: Callable,
+                     default: Any = None) -> Optional[Any]:
     if type(from_str) is not str:
         return default
 
@@ -12,7 +14,8 @@ def _safe_parse_base(from_str: str, constructor: Callable, default: Any = None) 
         return default
 
 
-def safe_parse_datetime(from_str: str, default: datetime = None) -> Optional[datetime]:
+def safe_parse_datetime(from_str: str,
+                        default: datetime = None) -> Optional[datetime]:
     if type(from_str) == datetime:
         return from_str
 

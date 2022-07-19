@@ -15,5 +15,6 @@ router.include_router(v0.router)
 @router.get("/", include_in_schema=False)
 async def welcome():
     return {
-        "message": "Welcome to the TT2 Raid Seed API! You can find the docs at /docs."
+        "message":
+        "Welcome to the TT2 Raid Seed API! You can find the docs at /docs."
     }
