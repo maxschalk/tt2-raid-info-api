@@ -1,15 +1,14 @@
-import asyncio
 import json
 import os
-import shutil
 from test.utils.make_request import make_request_sync
 
 import requests
+from src.enhance_seeds import main as enhance_seeds
 from src.models.SeedType import SeedType
 from src.models.Stage import Stage
 from src.PATHS import RAW_SEEDS_DIR
-from src.scripts.enhance_seeds import main as enhance_seeds
-from src.utils.seed_data_fs_interface import (dump_seed_data, get_all_seed_filenames,
+from src.utils.seed_data_fs_interface import (dump_seed_data,
+                                              get_all_seed_filenames,
                                               load_seed_data)
 
 STAGE = Stage.PRODUCTION
@@ -22,8 +21,7 @@ def down():
         method=requests.get,
         path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
         stage=STAGE,
-        parse_response=False
-    )
+        parse_response=False)
 
     if response.status_code != 200:
         print(
@@ -56,8 +54,7 @@ def down():
             path=f"admin/seed_file/{SeedType.RAW.value}/{filename}",
             stage=STAGE,
             parse_response=False,
-            stream=True
-        )
+            stream=True)
 
         if response.status_code != 200:
             print(
@@ -92,9 +89,7 @@ def up():
         make_request_sync(
             method=requests.get,
             path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-            stage=STAGE
-        )
-    )
+            stage=STAGE))
 
     print("local:", len(local_seed_filenames))
     print("server:", len(server_seed_filenames))
@@ -112,18 +107,14 @@ def up():
 
         print(f"-- posting {filename}")
 
-        response = make_request_sync(
-            method=requests.post,
-            path=f"admin/raw_seed_file/{filename}",
-            stage=STAGE,
-            data=json.dumps(seed_data),
-            parse_response=False
-        )
+        response = make_request_sync(method=requests.post,
+                                     path=f"admin/raw_seed_file/{filename}",
+                                     stage=STAGE,
+                                     data=json.dumps(seed_data),
+                                     parse_response=False)
 
         if response.status_code != 201:
-            print(
-                f"Error when posting 'admin/raw_seed_file/{filename}'"
-            )
+            print(f"Error when posting 'admin/raw_seed_file/{filename}'")
             print(f"\t{response.status_code=}: {response.text}")
             continue
 
@@ -131,16 +122,13 @@ def up():
 def main():
     up_down = input("Sync (U)p or (D)own? Anything else aborts | U/D/* > ")
 
-    match up_down.upper():
-        case 'D':
-            return down()
-        case 'U':
-            return up()
-        case s:
-            print(f"aborted with {s}")
-            return
+    if up_down.upper() == 'D':
+        return down()
+    elif up_down.upper() == 'U':
+        return up()
+    else:
+        print(f"aborted with {up_down}")
 
 
 if __name__ == "__main__":
-
     main()
