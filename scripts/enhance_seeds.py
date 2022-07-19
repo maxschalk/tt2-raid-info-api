@@ -32,15 +32,12 @@ def main():
         raw_seed_data = load_seed_data(filepath=filepath_raw_seed)
 
         enhanced_seed_data = list(
-            map(enhance_raid_info, temp_deepcopy(raw_seed_data))
-        )
+            map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
 
         filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
 
-        dump_seed_data(
-            filepath=filepath_enhanced_seed,
-            data=enhanced_seed_data
-        )
+        dump_seed_data(filepath=filepath_enhanced_seed,
+                       data=enhanced_seed_data)
 
 
 def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
@@ -108,13 +105,10 @@ def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
 
         consolidated_part = {
             "part_id": part_id,
-
             "armor_hp": 0,
             "armor_hp_formatted": "0",
-
             "body_hp": 0,
             "body_hp_formatted": "0",
-
             "armor_cursed": False,
             "body_cursed": False,
         }
@@ -130,7 +124,8 @@ def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
                         titan_part['total_hp'])
 
                     if 'cursed' in titan_part:
-                        consolidated_part['armor_cursed'] = titan_part['cursed']
+                        consolidated_part['armor_cursed'] = titan_part[
+                            'cursed']
 
                 elif titan_part_part_id.startswith(BODY_PREFIX):
                     consolidated_part['body_hp'] = titan_part['total_hp']
