@@ -4,8 +4,10 @@ from random import choice, randint
 from typing import Iterator
 
 from faker import Faker
-from src.domain.raid_data import *
-from src.domain.titan_anatomy import *
+from src.domain.raid_data import (Buff, ConsolidatedTitanPart, EnhancedTitan,
+                                  EnhancedTitanPart, RaidSeedDataEnhanced,
+                                  RaidSeedDataRaw, Titan, TitanPart)
+from src.domain.titan_anatomy import TITAN_PARTS_ATOMIC, TitanAnatomy
 
 fake = Faker()
 Faker.seed(0)

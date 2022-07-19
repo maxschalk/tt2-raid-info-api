@@ -1,5 +1,7 @@
+import asyncio
 import os
 
+import aiohttp
 import requests
 from dotenv import load_dotenv
 from src.domain.stage import Stage
@@ -52,3 +54,11 @@ async def make_request_async(*,
             return await response.json()
 
         return response
+
+
+async def make_requests_async(paths, stage):
+    async with aiohttp.ClientSession() as session:
+        return await asyncio.gather(*map(
+            lambda p: make_request_async(
+                stage=stage, method=session.get, path=p, response_json=True),
+            paths))

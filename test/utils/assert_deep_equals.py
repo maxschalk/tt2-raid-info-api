@@ -1,26 +1,26 @@
 from itertools import zip_longest
 
 
-def assert_deep_equals(a, b):
-    assert type(a) is type(b)
+def assert_deep_equals(first, second):
+    assert type(first) is type(second)
 
-    if isinstance(a, dict):
-        ks = set(a.keys()).union(set(b.keys()))
+    if isinstance(first, dict):
+        keys = set(first.keys()).union(set(second.keys()))
 
-        for k in ks:
+        for k in keys:
             try:
-                a_new = a[k]
-                b_new = b[k]
+                a_new = first[k]
+                b_new = second[k]
                 assert_deep_equals(a_new, b_new)
-            except KeyError:
-                raise AssertionError
+            except KeyError as exc:
+                raise AssertionError from exc
 
         return
 
-    if isinstance(a, list):
-        for a_new, b_new in zip_longest(a, b):
+    if isinstance(first, list):
+        for a_new, b_new in zip_longest(first, second):
             assert_deep_equals(a_new, b_new)
 
         return
 
-    assert a == b
+    assert first == second

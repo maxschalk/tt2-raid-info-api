@@ -1,5 +1,5 @@
 import asyncio
-from test.utils.make_request import make_request_async
+from test.utils.make_request import make_request_async, make_requests_async
 
 import aiohttp
 import pytest
@@ -19,12 +19,7 @@ async def test_raid_info_valid_model(stage: Stage):
         paths = tuple(f"{BASE_PATH}/{seed_type.value}/{tier}/1"
                       for tier in range(1, 5))
 
-        async with aiohttp.ClientSession() as session:
-            raid_infos = await asyncio.gather(*map(
-                lambda p: make_request_async(stage=stage,
-                                             method=session.get,
-                                             path=p,
-                                             response_json=True), paths))
+        raid_infos = await make_requests_async(paths, stage)
 
         for raid_info in raid_infos:
             data_type(**raid_info)

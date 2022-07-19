@@ -14,7 +14,7 @@ from src.utils.seed_data_fs_interface import (dump_seed_data,
 STAGE = Stage.PRODUCTION
 
 
-def down():
+def sync_down():
     print(f"syncing raid seeds down from {STAGE=}")
 
     response = make_request_sync(
@@ -70,8 +70,8 @@ def down():
 
         try:
             dump_seed_data(filepath=filepath, data=data)
-        except Exception as e:
-            print(f"Error when creating '{filename}': {e}")
+        except Exception as exc:
+            print(f"Error when creating '{filename}': {exc}")
 
         print(f"-- created '{filename}'")
 
@@ -80,7 +80,7 @@ def down():
     enhance_seeds()
 
 
-def up():
+def sync_up():
     print(f"syncing raid seeds up to {STAGE=}")
 
     local_seed_filenames = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
@@ -123,11 +123,13 @@ def main():
     up_down = input("Sync (U)p or (D)own? Anything else aborts | U/D/* > ")
 
     if up_down.upper() == 'D':
-        return down()
-    elif up_down.upper() == 'U':
-        return up()
-    else:
-        print(f"aborted with {up_down}")
+        return sync_down()
+    if up_down.upper() == 'U':
+        return sync_up()
+
+    print(f"aborted with {up_down}")
+
+    return None
 
 
 if __name__ == "__main__":

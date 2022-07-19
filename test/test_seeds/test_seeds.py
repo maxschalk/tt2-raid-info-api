@@ -1,10 +1,8 @@
-import asyncio
 import operator
 import unittest
-from test.utils.make_request import make_request_async, make_request_sync
+from test.utils.make_request import make_request_sync, make_requests_async
 from typing import Type, Union
 
-import aiohttp
 import pytest
 import requests
 from src.domain.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
@@ -43,12 +41,13 @@ def test_seeds_all_enhanced_valid_model(stage: Stage):
 def seeds_all_sort_order_base(stage: Stage,
                               seed_type: SeedType,
                               sort_order: SortOrder = None):
-    qs = "" if sort_order is None else f"?sort_order={sort_order.value}"
+    query = "" if sort_order is None else f"sort_order={sort_order.value}"
 
-    response = make_request_sync(method=requests.get,
-                                 path=f"{BASE_PATH}/{seed_type.value}/all{qs}",
-                                 stage=stage,
-                                 parse_response=False)
+    response = make_request_sync(
+        method=requests.get,
+        path=f"{BASE_PATH}/{seed_type.value}/all?{query}",
+        stage=stage,
+        parse_response=False)
 
     assert response.status_code == 200
 
@@ -58,13 +57,13 @@ def seeds_all_sort_order_base(stage: Stage,
         map(lambda seed: seed[0]["raid_info_valid_from"], server_seeds))
 
     if sort_order in {None, SortOrder.ASCENDING}:
-        op = operator.le
+        comparison_op = operator.le
     else:
-        op = operator.ge
+        comparison_op = operator.ge
 
     assert all(
-        op(a, b) for a, b in zip(server_seeds_valid_from_dates,
-                                 server_seeds_valid_from_dates[1:]))
+        comparison_op(a, b) for a, b in zip(server_seeds_valid_from_dates,
+                                            server_seeds_valid_from_dates[1:]))
 
 
 def test_seeds_all_raw_default_is_ascending(stage: Stage):
@@ -129,12 +128,7 @@ async def test_seeds_recent_get_descending_seeds(stage: Stage):
         paths = tuple(f"{BASE_PATH}/{seed_type.value}/recent?offset_weeks={i}"
                       for i, _ in enumerate(all_server_seeds))
 
-        async with aiohttp.ClientSession() as session:
-            individual_seeds = await asyncio.gather(*map(
-                lambda p: make_request_async(stage=stage,
-                                             method=session.get,
-                                             path=p,
-                                             response_json=True), paths))
+        individual_seeds = make_requests_async(paths, stage)
 
-        for a, b in zip(all_server_seeds, individual_seeds):
-            unittest.TestCase().assertListEqual(a, b)
+        for pair in zip(all_server_seeds, individual_seeds):
+            unittest.TestCase().assertListEqual(*pair)

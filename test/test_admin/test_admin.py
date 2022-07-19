@@ -12,11 +12,12 @@ BASE_PATH = "admin"
 def get_all_filenames_base(stage: Stage,
                            seed_type: SeedType,
                            sort_order: SortOrder = None):
-    qs = "" if sort_order is None else f"?sort_order={sort_order.value}"
+
+    query = "" if sort_order is None else f"sort_order={sort_order.value}"
 
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH}/all_seed_filenames/{seed_type.value}{qs}",
+        path=f"{BASE_PATH}/all_seed_filenames/{seed_type.value}?{query}",
         stage=stage,
         parse_response=False)
 
@@ -24,16 +25,16 @@ def get_all_filenames_base(stage: Stage,
 
     filenames = response.json()
 
-    assert all(type(filename) is str for filename in filenames)
+    assert all(isinstance(filename, str) for filename in filenames)
 
     assert any(filename.endswith('test') for filename in filenames) is False
 
     if sort_order in {None, SortOrder.ASCENDING}:
-        op = operator.le
+        comparison_op = operator.le
     else:
-        op = operator.ge
+        comparison_op = operator.ge
 
-    assert all(op(a, b) for a, b in zip(filenames, filenames[1:]))
+    assert all(comparison_op(a, b) for a, b in zip(filenames, filenames[1:]))
 
 
 def test_get_all_filenames(stage: Stage):
