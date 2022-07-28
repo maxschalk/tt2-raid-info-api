@@ -6,6 +6,8 @@ from src.model.seed_type import SeedType
 from src.stage import Stage
 from src.utils.sort_order import SortOrder
 
+# pylint: disable=duplicate-code
+
 BASE_PATH = "admin"
 
 

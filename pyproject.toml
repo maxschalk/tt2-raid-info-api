@@ -2,6 +2,9 @@
 
 disable = [
     "missing-docstring",
-    "broad-except",
-    "too-few-public-methods"
+    "too-few-public-methods",
+    "broad-except"
 ]
+
+ignore-paths="venv"
+# ignore-patterns=".*_test.py"

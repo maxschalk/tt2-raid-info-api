@@ -12,6 +12,8 @@ from src.stage import Stage
 from src.utils import selectors
 from src.utils.sort_order import SortOrder
 
+# pylint: disable=duplicate-code
+
 load_dotenv()
 
 BASE_PATH_ADMIN = "admin"
