@@ -1,15 +1,15 @@
 from typing import Union
 
 
-def format_hp(hp: Union[int, float]):
+def format_healthpoints(healthpoints: Union[int, float]):
     thousands_units = ["K", "M", "B", "T", "Q"]
     unit = ""
 
-    hp = int(hp)
+    healthpoints = int(healthpoints)
 
-    while hp >= 1000 and len(thousands_units):
-        hp = int(((hp / 1000) * 100)) / 100
+    while healthpoints >= 1000 and thousands_units:
+        healthpoints = int(((healthpoints / 1000) * 100)) / 100
 
         unit = thousands_units.pop(0)
 
-    return f"{hp:.2f}{unit}"
+    return f"{healthpoints:.2f}{unit}"

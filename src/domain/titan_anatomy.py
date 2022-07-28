@@ -42,7 +42,6 @@ TITAN_PARTS_CONSOLIDATED = (
 
 TITAN_PARTS_ALL = (
     *TITAN_PARTS_ATOMIC,
-
     TitanAnatomy.ARMS,
     TitanAnatomy.LEGS,
 )
@@ -56,7 +55,6 @@ TITAN_PART_REPRS = {
     TitanAnatomy.HAND_LEFT: "Left Hand",
     TitanAnatomy.LEG_RIGHT: "Right Leg",
     TitanAnatomy.LEG_LEFT: "Left Leg",
-
     TitanAnatomy.ARM_RIGHT: "Right Arm",
     TitanAnatomy.ARM_LEFT: "Left Arm",
     TitanAnatomy.ARMS: "Arms",
@@ -68,6 +66,5 @@ TITAN_ANATOMY = {
         "armor": f"{ARMOR_PREFIX}{titan_part}",
         "body": f"{BODY_PREFIX}{titan_part}"
     }
-    for titan_part
-    in TITAN_PARTS_ATOMIC
+    for titan_part in TITAN_PARTS_ATOMIC
 }

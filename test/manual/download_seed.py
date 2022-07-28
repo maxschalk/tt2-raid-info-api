@@ -1,10 +1,7 @@
-import json
+from test.utils.make_request import make_request_sync
 
 import requests
-from requests import Response
-
-from src.models.Stage import Stage
-from test.utils.make_request import make_request_sync
+from src.domain.stage import Stage
 
 result = make_request_sync(
     method=requests.get,

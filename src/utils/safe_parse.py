@@ -1,9 +1,11 @@
 from datetime import datetime
-from typing import Optional, Callable, Any
+from typing import Any, Callable, Optional
 
 
-def _safe_parse_base(from_str: str, constructor: Callable, default: Any = None) -> Optional[Any]:
-    if type(from_str) is not str:
+def _safe_parse_base(from_str: str,
+                     constructor: Callable,
+                     default: Any = None) -> Optional[Any]:
+    if not isinstance(from_str, str):
         return default
 
     try:
@@ -12,22 +14,23 @@ def _safe_parse_base(from_str: str, constructor: Callable, default: Any = None) 
         return default
 
 
-def safe_parse_datetime(from_str: str, default: datetime = None) -> Optional[datetime]:
-    if type(from_str) == datetime:
+def safe_parse_datetime(from_str: str,
+                        default: datetime = None) -> Optional[datetime]:
+    if isinstance(from_str, datetime):
         return from_str
 
     return _safe_parse_base(from_str, datetime.fromisoformat, default)
 
 
 def safe_parse_int(from_str: str, default: int = None) -> Optional[int]:
-    if type(from_str) == int:
+    if isinstance(from_str, int):
         return from_str
 
     return _safe_parse_base(from_str, int, default)
 
 
 def safe_parse_float(from_str: str, default: float = None) -> Optional[float]:
-    if type(from_str) == float:
+    if isinstance(from_str, float):
         return from_str
 
     return _safe_parse_base(from_str, float, default)

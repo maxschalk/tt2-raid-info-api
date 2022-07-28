@@ -19,5 +19,6 @@ router.include_router(raid_info.router)
 @router.get("/", include_in_schema=False)
 async def welcome():
     return {
-        "message": "Welcome to the TT2 Raid Seed API v0! You can find the docs at /docs."
+        "message":
+        "Welcome to the TT2 Raid Seed API v0! You can find the docs at /docs."
     }

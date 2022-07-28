@@ -1,4 +1,4 @@
-from src.utils.format_hp import format_hp
+from src.utils.format_hp import format_healthpoints
 
 CASES = (
     (0, "0.00"),
@@ -20,7 +20,6 @@ CASES = (
     (1000000000000, "1.00T"),
     (999999999999999, "999.99T"),
     (1000000000000000, "1.00Q"),
-
     (0.42424242, "0.00"),
     (42.42424242, "42.00"),
     (999.42424242, "999.00"),
@@ -45,7 +44,7 @@ CASES = (
 
 def test_format_hp():
     for case in CASES:
-        i, o = case
+        arg, output = case
 
-        assert format_hp(i) == o
-        assert format_hp(float(i)) == o
+        assert format_healthpoints(arg) == output
+        assert format_healthpoints(float(arg)) == output

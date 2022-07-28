@@ -1,12 +1,14 @@
 import os
 from typing import List
-from src.models.raid_data import ConsolidatedTitanPart, EnhancedTitan, EnhancedTitanPart, RaidSeedDataRaw, Titan, TitanPart
 
-from src.models.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
+from src.domain.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
+                                  EnhancedTitanPart, RaidSeedDataRaw, Titan,
+                                  TitanPart)
+from src.domain.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                       TITAN_PARTS_ATOMIC)
-from src.PATHS import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
+from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
-from src.utils.format_hp import format_hp
+from src.utils.format_hp import format_healthpoints
 from src.utils.seed_data_fs_interface import (dump_seed_data,
                                               get_all_seed_filenames,
                                               load_seed_data)
@@ -32,21 +34,18 @@ def main():
         raw_seed_data = load_seed_data(filepath=filepath_raw_seed)
 
         enhanced_seed_data = list(
-            map(enhance_raid_info, temp_deepcopy(raw_seed_data))
-        )
+            map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
 
         filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
 
-        dump_seed_data(
-            filepath=filepath_enhanced_seed,
-            data=enhanced_seed_data
-        )
+        dump_seed_data(filepath=filepath_enhanced_seed,
+                       data=enhanced_seed_data)
 
 
 def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
-    raid_info['raid_total_target_hp_formatted'] = format_hp(
+    raid_info['raid_total_target_hp_formatted'] = format_healthpoints(
         raid_total_target_hp)
 
     raid_info_titans = selectors.raid_titans(raid_info)
@@ -60,19 +59,22 @@ def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
 
 def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
     titan_total_hp = selectors.titan_total_hp(titan_info)
-    titan_info['total_hp_formatted'] = format_hp(titan_total_hp)
+    titan_info['total_hp_formatted'] = format_healthpoints(titan_total_hp)
 
     titan_total_armor_hp = selectors.titan_total_armor_hp(titan_info)
     titan_info['total_armor_hp'] = titan_total_armor_hp
-    titan_info['total_armor_hp_formatted'] = format_hp(titan_total_armor_hp)
+    titan_info['total_armor_hp_formatted'] = format_healthpoints(
+        titan_total_armor_hp)
 
     titan_total_body_hp = selectors.titan_total_body_hp(titan_info)
     titan_info['total_body_hp'] = titan_total_body_hp
-    titan_info['total_body_hp_formatted'] = format_hp(titan_total_body_hp)
+    titan_info['total_body_hp_formatted'] = format_healthpoints(
+        titan_total_body_hp)
 
     titan_skippable_hp = selectors.titan_skippable_hp(titan_info)
     titan_info['skippable_hp'] = titan_skippable_hp
-    titan_info['skippable_hp_formatted'] = format_hp(titan_skippable_hp)
+    titan_info['skippable_hp_formatted'] = format_healthpoints(
+        titan_skippable_hp)
 
     titan_info_parts = selectors.titan_parts(titan_info)
     enhanced_parts = list(map(enhance_titan_part, titan_info_parts))
@@ -90,7 +92,8 @@ def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
 
 def enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
     titan_part_total_hp = selectors.titan_part_hp(titan_part_info)
-    titan_part_info['total_hp_formatted'] = format_hp(titan_part_total_hp)
+    titan_part_info['total_hp_formatted'] = format_healthpoints(
+        titan_part_total_hp)
 
     cursed = selectors.titan_part_cursed(titan_part_info)
     titan_part_info['cursed'] = False if cursed is None else cursed
@@ -108,13 +111,10 @@ def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
 
         consolidated_part = {
             "part_id": part_id,
-
             "armor_hp": 0,
             "armor_hp_formatted": "0",
-
             "body_hp": 0,
             "body_hp_formatted": "0",
-
             "armor_cursed": False,
             "body_cursed": False,
         }
@@ -126,16 +126,19 @@ def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
 
                 if titan_part_part_id.startswith(ARMOR_PREFIX):
                     consolidated_part['armor_hp'] = titan_part['total_hp']
-                    consolidated_part['armor_hp_formatted'] = format_hp(
-                        titan_part['total_hp'])
+                    consolidated_part[
+                        'armor_hp_formatted'] = format_healthpoints(
+                            titan_part['total_hp'])
 
                     if 'cursed' in titan_part:
-                        consolidated_part['armor_cursed'] = titan_part['cursed']
+                        consolidated_part['armor_cursed'] = titan_part[
+                            'cursed']
 
                 elif titan_part_part_id.startswith(BODY_PREFIX):
                     consolidated_part['body_hp'] = titan_part['total_hp']
-                    consolidated_part['body_hp_formatted'] = format_hp(
-                        titan_part['total_hp'])
+                    consolidated_part[
+                        'body_hp_formatted'] = format_healthpoints(
+                            titan_part['total_hp'])
 
                     if 'cursed' in titan_part:
                         consolidated_part['body_cursed'] = titan_part['cursed']
