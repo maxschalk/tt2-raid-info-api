@@ -10,7 +10,7 @@ autopep8==1.6.0
 certifi==2022.5.18.1
 charset-normalizer==2.0.12
 click==8.1.2
-colorama==0.4.4
+colorama==0.4.5
 dill==0.3.5.1
 Faker==13.12.1
 fastapi==0.75.0
