@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
-from src.domain.raid_data import RaidSeedData
-from src.domain.seed_type import SeedType
+from src.model.raid_data import RaidSeedData
+from src.model.seed_type import SeedType
+from src.seed_data_fs_interface import fs_get_seed_data_by_recency
 from src.utils import selectors
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from src.utils.seed_data_fs_interface import fs_get_seed_data_by_recency
 
 router = APIRouter(
     prefix="/raid_info",

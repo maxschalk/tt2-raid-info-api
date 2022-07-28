@@ -2,7 +2,7 @@ import os
 
 import pytest
 from dotenv import load_dotenv
-from src.domain.stage import Stage
+from src.stage import Stage
 
 load_dotenv()
 

@@ -6,11 +6,11 @@ from typing import List, Tuple
 import pytest
 import requests
 from dotenv import load_dotenv
-from src.domain.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
-from src.domain.seed_type import SeedType
-from src.domain.sort_order import SortOrder
-from src.domain.stage import Stage
+from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.model.seed_type import SeedType
+from src.stage import Stage
 from src.utils import selectors
+from src.utils.sort_order import SortOrder
 
 load_dotenv()
 

@@ -2,7 +2,7 @@ import json
 from test.utils.make_request import make_request_sync
 
 import requests
-from src.domain.stage import Stage
+from src.stage import Stage
 
 with open("./test/manual/test_data_20220220.json", mode='r',
           encoding='utf-8') as file:

@@ -7,8 +7,8 @@ import pytest
 import requests
 # pylint: disable=no-name-in-module
 from pydantic import BaseModel
-from src.domain.raid_data import RaidSeedDataRaw
-from src.domain.stage import Stage
+from src.model.raid_data import RaidSeedDataRaw
+from src.stage import Stage
 from src.utils import selectors
 
 

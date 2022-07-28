@@ -3,9 +3,9 @@ from test.utils.make_request import make_request_async, make_requests_async
 
 import aiohttp
 import pytest
-from src.domain.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
-from src.domain.seed_type import SeedType
-from src.domain.stage import Stage
+from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.model.seed_type import SeedType
+from src.stage import Stage
 
 BASE_PATH = "raid_info"
 

@@ -3,13 +3,12 @@ import os
 from test.utils.make_request import make_request_sync
 
 import requests
-from src.domain.seed_type import SeedType
-from src.domain.stage import Stage
-from src.enhance_seeds import main as enhance_seeds
+from src.model.seed_type import SeedType
 from src.paths import RAW_SEEDS_DIR
-from src.utils.seed_data_fs_interface import (dump_seed_data,
-                                              get_all_seed_filenames,
-                                              load_seed_data)
+from src.scripts.enhance_seeds import main as enhance_seeds
+from src.seed_data_fs_interface import (dump_seed_data, get_all_seed_filenames,
+                                        load_seed_data)
+from src.stage import Stage
 
 STAGE = Stage.PRODUCTION
 

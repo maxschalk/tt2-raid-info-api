@@ -5,8 +5,9 @@ from os.path import isfile, join
 from typing import Iterator, List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
-from src.domain.raid_data import RaidSeedData
-from src.domain.sort_order import SortOrder
+
+from src.model.raid_data import RaidSeedData
+from src.utils.sort_order import SortOrder
 from src.paths import RAW_SEEDS_DIR
 
 

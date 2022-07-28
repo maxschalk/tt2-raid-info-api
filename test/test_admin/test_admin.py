@@ -2,9 +2,9 @@ import operator
 from test.utils.make_request import make_request_sync
 
 import requests
-from src.domain.seed_type import SeedType
-from src.domain.sort_order import SortOrder
-from src.domain.stage import Stage
+from src.model.seed_type import SeedType
+from src.stage import Stage
+from src.utils.sort_order import SortOrder
 
 BASE_PATH = "admin"
 

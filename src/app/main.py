@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from src.app.routers import api
-from src.domain.stage import Stage
+from src.stage import Stage
 
 load_dotenv()
 

@@ -2,11 +2,11 @@ from datetime import datetime
 from functools import reduce
 from typing import Dict, List, Optional, Tuple
 
-from src.domain import titan_anatomy
-from src.domain.raid_data import TitanPart
-from src.domain.validator_bin_op import ValidatorBinOp
+from src.model import titan_anatomy
+from src.model.raid_data import TitanPart
 from src.utils.safe_parse import (safe_parse_datetime, safe_parse_float,
                                   safe_parse_int)
+from src.utils.validator_bin_op import ValidatorBinOp
 
 # top level utility functions
 
