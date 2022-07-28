@@ -12,7 +12,7 @@ ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
 
 BASE_URLS = {
     Stage.DEV: "http://localhost:5000/api/v0",
-    Stage.PRODUCTION: "http://riskypengu.in/api/v0",
+    Stage.PRODUCTION: "https://tt2-raid-info-api.up.railway.app/api/v0",
 }
 
 HEADERS = {'secret': ENV_AUTH_SECRET}
