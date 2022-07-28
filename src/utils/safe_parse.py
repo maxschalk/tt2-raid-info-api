@@ -23,6 +23,9 @@ def safe_parse_datetime(from_str: str,
 
 
 def safe_parse_int(from_str: str, default: int = None) -> Optional[int]:
+    if isinstance(from_str, bool):
+        return default
+
     if isinstance(from_str, int):
         return from_str
 
