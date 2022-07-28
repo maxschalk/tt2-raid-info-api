@@ -187,7 +187,7 @@ async def test_raid_info_exists(stage: Stage,
 
         paths = tuple(build_path(raid_info, i) for raid_info in posted_seed)
 
-        raid_infos = make_requests_async(paths, stage)
+        raid_infos = await make_requests_async(paths, stage)
 
         for posted_raid_info, server_raid_info in zip(posted_seed, raid_infos):
             assert_deep_equals(posted_raid_info, server_raid_info)

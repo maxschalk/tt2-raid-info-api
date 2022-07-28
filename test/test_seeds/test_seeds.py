@@ -128,7 +128,9 @@ async def test_seeds_recent_get_descending_seeds(stage: Stage):
         paths = tuple(f"{BASE_PATH}/{seed_type.value}/recent?offset_weeks={i}"
                       for i, _ in enumerate(all_server_seeds))
 
-        individual_seeds = make_requests_async(paths, stage)
+        individual_seeds = await make_requests_async(paths, stage)
+
+        print(individual_seeds)
 
         for pair in zip(all_server_seeds, individual_seeds):
             unittest.TestCase().assertListEqual(*pair)
