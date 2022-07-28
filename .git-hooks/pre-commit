@@ -23,13 +23,13 @@ python -m scripts.format
 git add -f $STAGED_FILES
 
 # run linter script
-# echo python -m scripts.lint
-# python -m scripts.lint
-# LINTER_EXIT_CODE=$?
+echo python -m scripts.lint
+python -m scripts.lint
+LINTER_EXIT_CODE=$?
 
-# if [ $LINTER_EXIT_CODE -ne 0 ]; then
-#     echo "Linter error, commit aborted"
-#     exit 1
-# fi
+if [ $LINTER_EXIT_CODE -ne 0 ]; then
+    echo "Linter error, commit aborted"
+    exit 1
+fi
 
 exit 0
