@@ -35,7 +35,8 @@ def _factory_get_seed_by_recency(*, repo: SeedDataRepository):
             return RedirectResponse(
                 f"/api/v0/admin/seed/{seed_type.value}/{identifier}")
 
-        data = repo.get_seed_by_week_offset(offset_weeks=offset_weeks)
+        data = repo.get_seed_by_week_offset(seed_type=seed_type,
+                                            offset_weeks=offset_weeks)
 
         if data is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
