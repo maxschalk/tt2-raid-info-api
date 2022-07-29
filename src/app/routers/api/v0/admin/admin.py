@@ -3,7 +3,6 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 
-from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, StreamingResponse
@@ -16,14 +15,13 @@ from src.seed_data_fs_interface import dump_seed_data as fs_dump_seed_data
 from src.seed_data_fs_interface import fs_delete_raw_seed_file
 from src.seed_data_fs_interface import \
     get_sorted_seed_filenames as fs_get_sorted_seed_filenames
+from src.utils.get_env import get_env
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.sort_order import SortOrder
 
-load_dotenv()
-
-ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
-ENV_STAGE = os.getenv('STAGE')
+ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
+# ENV_STAGE = get_env('STAGE')
 
 DISPLAY_IN_DOCS = True  # ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
 

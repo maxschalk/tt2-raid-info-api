@@ -1,12 +1,8 @@
-import os
-
 import pytest
-from dotenv import load_dotenv
 from src.stage import Stage
-
-load_dotenv()
+from src.utils.get_env import get_env
 
 
 @pytest.fixture(scope="module", autouse=True)
 def stage() -> Stage:
-    return Stage(os.getenv("STAGE"))
+    return Stage(get_env(key='STAGE', strict=False) or Stage.PRODUCTION)

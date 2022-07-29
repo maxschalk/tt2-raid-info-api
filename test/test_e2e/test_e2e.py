@@ -5,7 +5,6 @@ from typing import List, Tuple
 
 import pytest
 import requests
-from dotenv import load_dotenv
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
 from src.stage import Stage
@@ -13,8 +12,6 @@ from src.utils import selectors
 from src.utils.sort_order import SortOrder
 
 # pylint: disable=duplicate-code
-
-load_dotenv()
 
 BASE_PATH_ADMIN = "admin"
 BASE_PATH_SEEDS = "seeds"

@@ -1,14 +1,11 @@
 import asyncio
-import os
 
 import aiohttp
 import requests
-from dotenv import load_dotenv
 from src.stage import Stage
+from src.utils.get_env import get_env
 
-load_dotenv()
-
-ENV_AUTH_SECRET = os.getenv('AUTH_SECRET')
+ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
 
 BASE_URLS = {
     Stage.DEV: "http://localhost:5000/api/v0",

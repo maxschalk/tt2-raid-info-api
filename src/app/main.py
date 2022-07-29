@@ -1,15 +1,11 @@
-import os
-
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from src.app.routers import api
 from src.stage import Stage
+from src.utils.get_env import get_env
 
-load_dotenv()
-
-ENV_STAGE = os.getenv('STAGE')
+ENV_STAGE = get_env(key='STAGE', strict=False) or Stage.PRODUCTION
 
 app = FastAPI(title=f"TT2 Raid Data API | {ENV_STAGE}",
               version="0.1.0",
