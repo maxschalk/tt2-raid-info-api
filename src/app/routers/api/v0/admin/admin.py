@@ -9,7 +9,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, StreamingResponse
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
-from src.utils.sort_order import SortOrder
 from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.scripts.enhance_seeds import enhance_raid_info
 from src.scripts.enhance_seeds import main as enhance_seeds
@@ -19,6 +18,7 @@ from src.seed_data_fs_interface import \
     get_sorted_seed_filenames as fs_get_sorted_seed_filenames
 from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
+from src.utils.sort_order import SortOrder
 
 load_dotenv()
 
@@ -41,9 +41,8 @@ def verify_authorization(*, secret: Optional[str]):
             detail="You are not authorized to make this request.")
 
 
-@router.get("/all_seed_filenames/{seed_type}",
-            include_in_schema=DISPLAY_IN_DOCS)
-async def get_seed_filenames(
+@router.get("/seed_identifiers/{seed_type}", include_in_schema=DISPLAY_IN_DOCS)
+async def get_seed_identifiers(
     seed_type: SeedType,
     *,
     sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
@@ -55,26 +54,26 @@ async def get_seed_filenames(
                                         sort_order=sort_order)
 
 
-@router.get("/seed_file/{seed_type}/{filename}",
+@router.get("/seed/{seed_type}/{identifier}",
             include_in_schema=DISPLAY_IN_DOCS)
 async def download_seed_file(seed_type: SeedType,
-                             filename: str) -> FileResponse:
-    if not filename.endswith(".json"):
-        filename = f"{filename}.json"
+                             identifier: str) -> FileResponse:
+    if not identifier.endswith(".json"):
+        identifier = f"{identifier}.json"
 
     dir_path = get_seeds_dir_path(seed_type=seed_type)
 
-    filepath = os.path.join(dir_path, filename)
+    filepath = os.path.join(dir_path, identifier)
 
     if not os.path.exists(filepath):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"{seed_type.value} file {filename} does not exist")
+            detail=f"{seed_type.value} file {identifier} does not exist")
 
     try:
         return FileResponse(filepath,
                             media_type='application/json',
-                            filename=f"{seed_type.value}_{filename}")
+                            filename=f"{seed_type.value}_{identifier}")
 
     except Exception as exc:
         raise HTTPException(
@@ -83,14 +82,14 @@ async def download_seed_file(seed_type: SeedType,
         ) from exc
 
 
-@router.post("/enhance_seed", include_in_schema=DISPLAY_IN_DOCS)
-async def enhance_seed_file(
+@router.post("/enhance", include_in_schema=DISPLAY_IN_DOCS)
+async def enhance_seed(
     *,
     download: bool = False,
     data: List[RaidSeedDataRaw],
 ) -> List[RaidSeedDataEnhanced]:
 
-    enhanced_seed_data = List(map(enhance_raid_info, jsonable_encoder(data)))
+    enhanced_seed_data = list(map(enhance_raid_info, jsonable_encoder(data)))
 
     if download:
         stream = io.StringIO()
@@ -108,20 +107,20 @@ async def enhance_seed_file(
     return enhanced_seed_data
 
 
-@router.post("/raw_seed_file/{filename}",
+@router.post("/save/{identifier}",
              status_code=201,
              include_in_schema=DISPLAY_IN_DOCS)
-async def create_seed_file(
-    filename: str,
+async def save_seed(
+    identifier: str,
     *,
     data: List[RaidSeedDataRaw],
     secret: Optional[str] = Header(None)) -> Dict:
     verify_authorization(secret=secret)
 
-    if not filename.endswith(".json"):
-        filename = f"{filename}.json"
+    if not identifier.endswith(".json"):
+        identifier = f"{identifier}.json"
 
-    filepath = os.path.join(RAW_SEEDS_DIR, filename)
+    filepath = os.path.join(RAW_SEEDS_DIR, identifier)
 
     try:
         file_created = fs_dump_seed_data(filepath=filepath, data=data)
@@ -132,37 +131,37 @@ async def create_seed_file(
         ) from exc
 
     if file_created is False:
-        msg = f"File '{filename}' already exists on the server."
+        msg = f"File '{identifier}' already exists on the server."
     else:
         enhance_seeds()
 
-        msg = f"File '{filename}' created."
+        msg = f"File '{identifier}' created."
 
     return {
         "detail": msg,
-        "filename": filename,
+        "filename": identifier,
         "created": file_created,
     }
 
 
-@router.delete("/raw_seed_file/{filename}", include_in_schema=DISPLAY_IN_DOCS)
-async def delete_raw_seed_file(
-    filename: str, *, secret: Optional[str] = Header(None)) -> Dict:
+@router.delete("/delete/{identifier}", include_in_schema=DISPLAY_IN_DOCS)
+async def delete_seed(identifier: str, *,
+                      secret: Optional[str] = Header(None)) -> Dict:
     verify_authorization(secret=secret)
 
-    if not filename.endswith(".json"):
-        filename = f"{filename}.json"
+    if not identifier.endswith(".json"):
+        identifier = f"{identifier}.json"
 
-    file_deleted = fs_delete_raw_seed_file(filename=filename)
+    file_deleted = fs_delete_raw_seed_file(filename=identifier)
 
     if file_deleted:
         enhance_seeds()
-        msg = f"Raw seed file '{filename}' was deleted"
+        msg = f"Raw seed file '{identifier}' was deleted"
     else:
-        msg = f"Raw seed file '{filename}' could not be found"
+        msg = f"Raw seed file '{identifier}' could not be found"
 
     return {
         "detail": msg,
-        "filename": filename,
+        "filename": identifier,
         "deleted": file_deleted,
     }

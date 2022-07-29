@@ -19,8 +19,8 @@ router = APIRouter(
 )
 
 
-@router.get("/{seed_type}/all")
-async def sorted_seeds(
+@router.get("/{seed_type}")
+async def get_all_seeds_sorted(
         seed_type: SeedType,
         sort_order: SortOrder = SortOrder.ASCENDING
 ) -> Tuple[List[RaidSeedData]]:
