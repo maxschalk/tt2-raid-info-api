@@ -51,7 +51,6 @@ def create_router(seed_data_repo: SeedDataRepository):
         path="/{seed_type}/{tier}/{level}",
         methods=["get"],
         endpoint=_factory_raid_info_by_tier_level(repo=seed_data_repo),
-        response_model=RaidSeedData,
         summary="Individual raid level info",
         description="Select the data for a single raid level by tier and level"
     )
