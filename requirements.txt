@@ -1,3 +1,4 @@
+aiofile==3.7.4
 aiohttp==3.8.1
 aiosignal==1.2.0
 anyio==3.5.0
@@ -7,6 +8,7 @@ async-timeout==4.0.2
 atomicwrites==1.4.0
 attrs==21.4.0
 autopep8==1.6.0
+caio==0.9.6
 certifi==2022.5.18.1
 charset-normalizer==2.0.12
 click==8.1.2
