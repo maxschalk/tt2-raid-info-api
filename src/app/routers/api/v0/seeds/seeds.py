@@ -30,10 +30,10 @@ async def get_all_seeds_sorted(
 
 
 @router.get("/{seed_type}/recent")
-async def seed_by_recency(seed_type: SeedType,
-                          offset_weeks: int = 0,
-                          *,
-                          download: bool = False) -> List[RaidSeedData]:
+async def get_seed_by_recency(seed_type: SeedType,
+                              offset_weeks: int = 0,
+                              *,
+                              download: bool = False) -> List[RaidSeedData]:
     dir_path = get_seeds_dir_path(seed_type=seed_type)
 
     if download:
