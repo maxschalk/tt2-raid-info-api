@@ -1,44 +1,49 @@
 import os
 from typing import List
 
+from src.domain.seed_data_filesystem_repository import \
+    SeedDataFilesystemRepository
 from src.model.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
                                  EnhancedTitanPart, RaidSeedDataRaw, Titan,
                                  TitanPart)
+from src.model.seed_type import SeedType
 from src.model.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                      TITAN_PARTS_ATOMIC)
-from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
-from src.seed_data_fs_interface import (dump_seed_data, get_all_seed_filenames,
-                                        load_seed_data)
+from src.paths import DATA_DIR, ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
 from src.utils.format_hp import format_healthpoints
 from src.utils.temp_deepcopy import temp_deepcopy
 
+seed_data_repo = SeedDataFilesystemRepository(base_path=DATA_DIR)
+
 
 def main():
-    raw_seed_paths = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
+    raw_seed_paths = set(
+        seed_data_repo.list_seed_identifiers(seed_type=SeedType.RAW))
     enhanced_seed_paths = set(
-        get_all_seed_filenames(dir_path=ENHANCED_SEEDS_DIR))
+        seed_data_repo.list_seed_identifiers(seed_type=SeedType.ENHANCED))
 
-    delete_seed_filenames = enhanced_seed_paths - raw_seed_paths
+    delete_seed_ids = enhanced_seed_paths - raw_seed_paths
 
-    enhance_seed_filenames = raw_seed_paths - enhanced_seed_paths
+    enhance_seed_ids = raw_seed_paths - enhanced_seed_paths
 
-    for filename in delete_seed_filenames:
-        filepath = os.path.join(ENHANCED_SEEDS_DIR, filename)
+    for seed_id in delete_seed_ids:
+        seed_data_repo.delete_seed(identifier=seed_id,
+                                   seed_type=SeedType.ENHANCED)
 
-        os.remove(filepath)
-
-    for filename in enhance_seed_filenames:
-        filepath_raw_seed = os.path.join(RAW_SEEDS_DIR, filename)
-        raw_seed_data = load_seed_data(filepath=filepath_raw_seed)
+    for seed_id in enhance_seed_ids:
+        raw_seed_data = seed_data_repo.get_seed_by_identifier(
+            identifier=seed_id, seed_type=SeedType.RAW)
 
         enhanced_seed_data = list(
             map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
 
-        filepath_enhanced_seed = os.path.join(ENHANCED_SEEDS_DIR, filename)
+        success = seed_data_repo.save_seed(identifier=seed_id,
+                                           seed_type=SeedType.ENHANCED,
+                                           data=enhanced_seed_data)
 
-        dump_seed_data(filepath=filepath_enhanced_seed,
-                       data=enhanced_seed_data)
+        if not success:
+            print(f"Could not enhance {seed_id}")
 
 
 def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:

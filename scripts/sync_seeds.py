@@ -1,78 +1,63 @@
 import json
-import os
 from test.utils.make_request import make_request_sync
 
 import requests
+from src.domain.seed_data_filesystem_repository import \
+    SeedDataFilesystemRepository
 from src.model.seed_type import SeedType
-from src.paths import RAW_SEEDS_DIR
+from src.paths import DATA_DIR
 from src.scripts.enhance_seeds import main as enhance_seeds
-from src.seed_data_fs_interface import (dump_seed_data, get_all_seed_filenames,
-                                        load_seed_data)
 from src.stage import Stage
 
 STAGE = Stage.PRODUCTION
+
+seed_data_repo = SeedDataFilesystemRepository(base_path=DATA_DIR)
 
 
 def sync_down():
     print(f"syncing raid seeds down from {STAGE=}")
 
-    response = make_request_sync(
-        method=requests.get,
-        path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-        stage=STAGE,
-        parse_response=False)
+    server_seed_ids = set(
+        make_request_sync(method=requests.get,
+                          path=f"admin/seed_identifiers/{SeedType.RAW.value}",
+                          stage=STAGE))
 
-    if response.status_code != 200:
-        print(
-            f"Error when getting 'admin/all_seed_filenames/{SeedType.RAW.value}'"
-        )
-        print(f"\t{response.status_code=}: {response.text}")
+    local_seed_ids = set(seed_data_repo.list_seed_identifiers())
 
-        return
+    print("server:", len(server_seed_ids))
+    print("local:", len(local_seed_ids))
 
-    data = response.json()
-
-    server_seed_filenames = set(data)
-
-    local_seed_filenames = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
-
-    print("server:", len(server_seed_filenames))
-    print("local:", len(local_seed_filenames))
-
-    to_sync = server_seed_filenames - local_seed_filenames
+    to_sync = server_seed_ids - local_seed_ids
 
     print("to sync down:", to_sync)
 
-    for filename in to_sync:
+    for seed_id in to_sync:
 
-        print(f"{filename}:")
-        print(f"-- getting '{filename}'")
+        print(f"{seed_id}:")
+        print(f"-- getting '{seed_id}'")
 
         response = make_request_sync(
             method=requests.get,
-            path=f"admin/seed_file/{SeedType.RAW.value}/{filename}",
+            path=f"admin/seed/{SeedType.RAW.value}/{seed_id}",
             stage=STAGE,
             parse_response=False,
             stream=True)
 
         if response.status_code != 200:
             print(
-                f"Error when getting 'admin/seed_file/{SeedType.RAW.value}/{filename}'"
+                f"Error when getting 'admin/seed/{SeedType.RAW.value}/{seed_id}'"
             )
             print(f"\t{response.status_code=}: {response.text}")
             continue
 
-        print(f"-- creating {filename}")
+        print(f"-- creating {seed_id}")
 
-        filepath = os.path.join(RAW_SEEDS_DIR, filename)
         data = response.json()
+        seed_data_repo.save_seed(identifier=seed_id,
+                                 seed_type=SeedType.RAW,
+                                 data=data)
 
-        try:
-            dump_seed_data(filepath=filepath, data=data)
-        except Exception as exc:
-            print(f"Error when creating '{filename}': {exc}")
-
-        print(f"-- created '{filename}'")
+        print(f"-- created '{seed_id}'")
 
     print("enhancing seeds")
 
@@ -82,38 +67,37 @@ def sync_down():
 def sync_up():
     print(f"syncing raid seeds up to {STAGE=}")
 
-    local_seed_filenames = set(get_all_seed_filenames(dir_path=RAW_SEEDS_DIR))
+    server_seed_ids = set(
+        make_request_sync(method=requests.get,
+                          path=f"admin/seed_identifiers/{SeedType.RAW.value}",
+                          stage=STAGE))
 
-    server_seed_filenames = set(
-        make_request_sync(
-            method=requests.get,
-            path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
-            stage=STAGE))
+    local_seed_ids = set(seed_data_repo.list_seed_identifiers())
 
-    print("local:", len(local_seed_filenames))
-    print("server:", len(server_seed_filenames))
+    print("local:", len(local_seed_ids))
+    print("server:", len(server_seed_ids))
 
-    to_sync = local_seed_filenames - server_seed_filenames
+    to_sync = local_seed_ids - server_seed_ids
 
     print("to sync up:", to_sync)
 
-    for filename in to_sync:
-        print(f"{filename}:")
-        print(f"-- loading '{filename}'")
+    for seed_id in to_sync:
+        print(f"{seed_id}:")
+        print(f"-- loading '{seed_id}'")
 
-        seed_data = load_seed_data(
-            filepath=os.path.join(RAW_SEEDS_DIR, filename))
+        seed_data = seed_data_repo.get_seed_by_identifier(
+            identifier=seed_id, seed_type=SeedType.RAW)
 
-        print(f"-- posting {filename}")
+        print(f"-- posting {seed_id}")
 
         response = make_request_sync(method=requests.post,
-                                     path=f"admin/raw_seed_file/{filename}",
+                                     path=f"admin/save/{seed_id}",
                                      stage=STAGE,
                                      data=json.dumps(seed_data),
                                      parse_response=False)
 
         if response.status_code != 201:
-            print(f"Error when posting 'admin/raw_seed_file/{filename}'")
+            print(f"Error when posting 'admin/raw_seed_file/{seed_id}'")
             print(f"\t{response.status_code=}: {response.text}")
             continue
 
