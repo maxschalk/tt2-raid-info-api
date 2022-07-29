@@ -32,7 +32,7 @@ router = APIRouter(
 )
 
 
-def verify_authorization(*, secret: Optional[str]):
+def _verify_authorization(*, secret: Optional[str]):
     if not secret or secret != ENV_AUTH_SECRET:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -113,7 +113,7 @@ async def save_seed(
     *,
     data: List[RaidSeedDataRaw],
     secret: Optional[str] = Header(None)) -> Dict:
-    verify_authorization(secret=secret)
+    _verify_authorization(secret=secret)
 
     if not identifier.endswith(".json"):
         identifier = f"{identifier}.json"
@@ -145,7 +145,7 @@ async def save_seed(
 @router.delete("/delete/{identifier}", include_in_schema=DISPLAY_IN_DOCS)
 async def delete_seed(identifier: str, *,
                       secret: Optional[str] = Header(None)) -> Dict:
-    verify_authorization(secret=secret)
+    _verify_authorization(secret=secret)
 
     if not identifier.endswith(".json"):
         identifier = f"{identifier}.json"
