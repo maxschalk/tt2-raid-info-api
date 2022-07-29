@@ -17,7 +17,7 @@ def seeds_all_valid_model_base(stage: Stage, seed_type: SeedType,
                                data_type: Type[Union[RaidSeedDataRaw,
                                                      RaidSeedDataEnhanced]]):
     response = make_request_sync(method=requests.get,
-                                 path=f"{BASE_PATH}/{seed_type.value}/all",
+                                 path=f"{BASE_PATH}/{seed_type.value}",
                                  stage=stage,
                                  parse_response=False)
 
@@ -43,11 +43,10 @@ def seeds_all_sort_order_base(stage: Stage,
                               sort_order: SortOrder = None):
     query = "" if sort_order is None else f"sort_order={sort_order.value}"
 
-    response = make_request_sync(
-        method=requests.get,
-        path=f"{BASE_PATH}/{seed_type.value}/all?{query}",
-        stage=stage,
-        parse_response=False)
+    response = make_request_sync(method=requests.get,
+                                 path=f"{BASE_PATH}/{seed_type.value}?{query}",
+                                 stage=stage,
+                                 parse_response=False)
 
     assert response.status_code == 200
 
@@ -121,7 +120,7 @@ async def test_seeds_recent_get_descending_seeds(stage: Stage):
         all_server_seeds = make_request_sync(
             method=requests.get,
             path=
-            f"{BASE_PATH}/{seed_type.value}/all?sort_order={SortOrder.DESCENDING.value}",
+            f"{BASE_PATH}/{seed_type.value}?sort_order={SortOrder.DESCENDING.value}",
             stage=stage,
             parse_response=False).json()
 
@@ -129,8 +128,6 @@ async def test_seeds_recent_get_descending_seeds(stage: Stage):
                       for i, _ in enumerate(all_server_seeds))
 
         individual_seeds = await make_requests_async(paths, stage)
-
-        print(individual_seeds)
 
         for pair in zip(all_server_seeds, individual_seeds):
             unittest.TestCase().assertListEqual(*pair)

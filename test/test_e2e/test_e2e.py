@@ -31,11 +31,11 @@ def admin_get_all_filenames_base(stage: Stage,
                                                           RaidSeedDataRaw]],
                                  seed_type: SeedType,
                                  sort_order: SortOrder = None):
-    query = "" if sort_order is None else f"?sort_order={sort_order.value}"
+    query = "" if sort_order is None else f"sort_order={sort_order.value}"
 
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH_ADMIN}/all_seed_filenames/{seed_type.value}{query}",
+        path=f"{BASE_PATH_ADMIN}/seed_identifiers/{seed_type.value}?{query}",
         stage=stage,
         parse_response=False)
 
@@ -71,7 +71,7 @@ def test_admin_download_file(
     for filename, posted_seed in posted_seeds:
         response = make_request_sync(
             method=requests.get,
-            path=f"{BASE_PATH_ADMIN}/seed_file/{SeedType.RAW.value}/{filename}",
+            path=f"{BASE_PATH_ADMIN}/seed/{SeedType.RAW.value}/{filename}",
             stage=stage,
             parse_response=False)
 
@@ -91,7 +91,7 @@ def test_seeds_all_raw_contains_posted_seeds(
 ):
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}/all",
+        path=f"{BASE_PATH_SEEDS}/{SeedType.RAW.value}",
         stage=stage,
         parse_response=False)
 
@@ -109,7 +109,7 @@ def test_seeds_recent_raw_contains_posted_seed(
         stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
-        path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
+        path=f"admin/seed_identifiers/{SeedType.RAW.value}",
         stage=stage,
     )
 
@@ -134,7 +134,7 @@ def test_seeds_all_were_enhanced(stage: Stage,
                                  posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
-        path=f"admin/all_seed_filenames/{SeedType.ENHANCED.value}",
+        path=f"admin/seed_identifiers/{SeedType.ENHANCED.value}",
         stage=stage,
     )
 
@@ -168,7 +168,7 @@ async def test_raid_info_exists(stage: Stage,
                                 posted_seeds: List[RaidSeedDataRaw]):
     all_filenames = make_request_sync(
         method=requests.get,
-        path=f"admin/all_seed_filenames/{SeedType.RAW.value}",
+        path=f"admin/seed_identifiers/{SeedType.RAW.value}",
         stage=stage,
     )
 
@@ -202,7 +202,7 @@ def test_admin_delete_file(
     for filename, _ in posted_seeds:
         response = make_request_sync(
             method=requests.delete,
-            path=f"{BASE_PATH_ADMIN}/raw_seed_file/{filename}",
+            path=f"{BASE_PATH_ADMIN}/delete/{filename}",
             stage=stage,
             parse_response=False)
 
@@ -215,7 +215,7 @@ def test_admin_filenames_deleted(
 ):
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH_ADMIN}/all_seed_filenames/{SeedType.RAW.value}",
+        path=f"{BASE_PATH_ADMIN}/seed_identifiers/{SeedType.RAW.value}",
         stage=stage,
         parse_response=False)
 

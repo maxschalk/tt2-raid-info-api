@@ -31,7 +31,7 @@ def posted_seeds(stage: Stage) -> List[Tuple[str, RaidSeedDataRaw]]:
 
     for filename, seed in seeds_posted:
         response = make_request_sync(method=requests.post,
-                                     path=f"admin/raw_seed_file/{filename}",
+                                     path=f"admin/save/{filename}",
                                      data=json.dumps(seed),
                                      stage=stage,
                                      parse_response=False)
@@ -42,7 +42,7 @@ def posted_seeds(stage: Stage) -> List[Tuple[str, RaidSeedDataRaw]]:
 
     for filename, _ in seeds_posted:
         response = make_request_sync(method=requests.delete,
-                                     path=f"admin/raw_seed_file/{filename}",
+                                     path=f"admin/delete/{filename}",
                                      stage=stage,
                                      parse_response=False)
 

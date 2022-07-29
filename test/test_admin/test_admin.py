@@ -19,7 +19,7 @@ def get_all_filenames_base(stage: Stage,
 
     response = make_request_sync(
         method=requests.get,
-        path=f"{BASE_PATH}/all_seed_filenames/{seed_type.value}?{query}",
+        path=f"{BASE_PATH}/seed_identifiers/{seed_type.value}?{query}",
         stage=stage,
         parse_response=False)
 
