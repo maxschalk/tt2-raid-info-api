@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Iterator, List, Optional, Tuple
+from typing import Any, Iterator, List, Optional, Tuple, Union
 
 from fastapi.encoders import jsonable_encoder
 from src.domain.seed_data_repository import SeedDataRepository
@@ -30,7 +30,7 @@ def _save_to_json_file(*, filepath: Path, data: Any) -> bool:
 
 class SeedDataFilesystemRepository(SeedDataRepository):
 
-    def __init__(self, *, base_path: str = None) -> None:
+    def __init__(self, *, base_path: Union[str, Path]) -> None:
         super().__init__()
 
         self.base_path = Path(base_path)
@@ -41,9 +41,12 @@ class SeedDataFilesystemRepository(SeedDataRepository):
     def list_seed_identifiers(
             self: SeedDataRepository,
             *,
+            seed_type: SeedType = SeedType.RAW,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
 
-        path_iterator = _filepath_generator(dir_path=self.dir_raw)
+        dir_path = self.base_path / seed_type.value
+
+        path_iterator = _filepath_generator(dir_path=dir_path)
 
         id_iterator = map(lambda path: path.stem, path_iterator)
 

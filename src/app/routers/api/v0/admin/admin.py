@@ -1,35 +1,22 @@
-import io
-import json
-import os
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
+from src.domain.seed_data_repository import SeedDataRepository
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
-from src.paths import ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.scripts.enhance_seeds import enhance_raid_info
 from src.scripts.enhance_seeds import main as enhance_seeds
-from src.seed_data_fs_interface import dump_seed_data as fs_dump_seed_data
-from src.seed_data_fs_interface import fs_delete_raw_seed_file
-from src.seed_data_fs_interface import \
-    get_sorted_seed_filenames as fs_get_sorted_seed_filenames
 from src.utils.get_env import get_env
-from src.utils.get_seeds_dir_path import get_seeds_dir_path
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.sort_order import SortOrder
+from src.utils.stream_response import create_stream_response
 
 ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
 # ENV_STAGE = get_env('STAGE')
 
 DISPLAY_IN_DOCS = True  # ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
-
-router = APIRouter(
-    prefix="/admin",
-    tags=["admin"],
-    responses=RESPONSE_STANDARD_NOT_FOUND,
-)
 
 
 def _verify_authorization(*, secret: Optional[str]):
@@ -39,127 +26,145 @@ def _verify_authorization(*, secret: Optional[str]):
             detail="You are not authorized to make this request.")
 
 
-@router.get("/seed_identifiers/{seed_type}", include_in_schema=DISPLAY_IN_DOCS)
-async def get_seed_identifiers(
-    seed_type: SeedType,
-    *,
-    sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
-) -> Tuple[str]:
+def _factory_list_seed_identifiers(*, repo: SeedDataRepository):
 
-    dir_path = RAW_SEEDS_DIR if seed_type == SeedType.RAW else ENHANCED_SEEDS_DIR
+    async def list_seed_identifiers(
+        seed_type: SeedType,
+        *,
+        sort_order: Optional[SortOrder] = SortOrder.ASCENDING,
+    ) -> Tuple[str]:
+        return repo.list_seed_identifiers(seed_type=seed_type,
+                                          sort_order=sort_order)
 
-    return fs_get_sorted_seed_filenames(dir_path=dir_path,
-                                        sort_order=sort_order)
-
-
-@router.get("/seed/{seed_type}/{identifier}",
-            include_in_schema=DISPLAY_IN_DOCS)
-async def download_seed_file(seed_type: SeedType,
-                             identifier: str) -> FileResponse:
-    if not identifier.endswith(".json"):
-        identifier = f"{identifier}.json"
-
-    dir_path = get_seeds_dir_path(seed_type=seed_type)
-
-    filepath = os.path.join(dir_path, identifier)
-
-    if not os.path.exists(filepath):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"{seed_type.value} file {identifier} does not exist")
-
-    try:
-        return FileResponse(filepath,
-                            media_type='application/json',
-                            filename=f"{seed_type.value}_{identifier}")
-
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Something went wrong when getting the file: {exc}"
-        ) from exc
+    return list_seed_identifiers
 
 
-@router.post("/enhance", include_in_schema=DISPLAY_IN_DOCS)
-async def enhance_seed(
-    *,
-    download: bool = False,
-    data: List[RaidSeedDataRaw],
-) -> List[RaidSeedDataEnhanced]:
+def _factory_download_seed_file(*, repo: SeedDataRepository):
 
-    enhanced_seed_data = list(map(enhance_raid_info, jsonable_encoder(data)))
+    async def download_seed_file(seed_type: SeedType,
+                                 identifier: str) -> StreamingResponse:
 
-    if download:
-        stream = io.StringIO()
+        data = repo.get_seed_by_identifier(identifier=identifier,
+                                           seed_type=seed_type)
 
-        json.dump(enhanced_seed_data, stream)
+        if data is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"{seed_type.value} seed {identifier} does not exist")
 
-        return StreamingResponse(
-            iter([stream.getvalue()]),
-            media_type="application/json",
-            headers={
-                "Content-Disposition":
-                "attachment; filename=enhanced_custom_seed.json"
-            })
+        return create_stream_response(data=data, filename=f"{identifier}.json")
 
-    return enhanced_seed_data
+    return download_seed_file
 
 
-@router.post("/save/{identifier}",
-             status_code=201,
-             include_in_schema=DISPLAY_IN_DOCS)
-async def save_seed(
-    identifier: str,
-    *,
-    data: List[RaidSeedDataRaw],
-    secret: Optional[str] = Header(None)) -> Dict:
-    _verify_authorization(secret=secret)
+def _factory_enhance_seed():
 
-    if not identifier.endswith(".json"):
-        identifier = f"{identifier}.json"
+    async def enhance_seed(
+        *,
+        download: bool = False,
+        data: List[RaidSeedDataRaw],
+    ) -> Union[StreamingResponse, List[RaidSeedDataEnhanced]]:
 
-    filepath = os.path.join(RAW_SEEDS_DIR, identifier)
+        enhanced_seed_data = list(
+            map(enhance_raid_info, jsonable_encoder(data)))
 
-    try:
-        file_created = fs_dump_seed_data(filepath=filepath, data=data)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Something went wrong when interfacing with the filesystem."
-        ) from exc
+        if download:
+            return create_stream_response(data=enhanced_seed_data,
+                                          filename="enhanced_custom_seed.json")
 
-    if file_created is False:
-        msg = f"File '{identifier}' already exists on the server."
-    else:
-        enhance_seeds()
+        return enhanced_seed_data
 
-        msg = f"File '{identifier}' created."
-
-    return {
-        "detail": msg,
-        "filename": identifier,
-        "created": file_created,
-    }
+    return enhance_seed
 
 
-@router.delete("/delete/{identifier}", include_in_schema=DISPLAY_IN_DOCS)
-async def delete_seed(identifier: str, *,
-                      secret: Optional[str] = Header(None)) -> Dict:
-    _verify_authorization(secret=secret)
+def _factory_save_seed(*, repo: SeedDataRepository):
 
-    if not identifier.endswith(".json"):
-        identifier = f"{identifier}.json"
+    async def save_seed(
+        identifier: str,
+        *,
+        data: List[RaidSeedDataRaw],
+        secret: Optional[str] = Header(None)) -> Dict:
 
-    file_deleted = fs_delete_raw_seed_file(filename=identifier)
+        _verify_authorization(secret=secret)
 
-    if file_deleted:
-        enhance_seeds()
-        msg = f"Raw seed file '{identifier}' was deleted"
-    else:
-        msg = f"Raw seed file '{identifier}' could not be found"
+        success = repo.save_seed(identifier=identifier,
+                                 data=data,
+                                 seed_type=SeedType.RAW)
 
-    return {
-        "detail": msg,
-        "filename": identifier,
-        "deleted": file_deleted,
-    }
+        if success:
+            enhance_seeds()
+            msg = f"Created seed '{identifier}'"
+        else:
+            msg = f"Seed '{identifier}' already exists"
+
+        return {
+            "detail": msg,
+            "identifier": identifier,
+            "success": success,
+        }
+
+    return save_seed
+
+
+def _factory_delete_seed(*, repo: SeedDataRepository):
+
+    async def delete_seed(identifier: str,
+                          *,
+                          secret: Optional[str] = Header(None)) -> Dict:
+        _verify_authorization(secret=secret)
+
+        success = repo.delete_seed(identifier=identifier,
+                                   seed_type=SeedType.RAW)
+
+        if success:
+            enhance_seeds()
+            msg = f"Deleted seed '{identifier}'"
+        else:
+            msg = f"Seed '{identifier}' does not exist"
+
+        return {
+            "detail": msg,
+            "filename": identifier,
+            "success": success,
+        }
+
+    return delete_seed
+
+
+def create_router(seed_data_repo: SeedDataRepository):
+
+    router = APIRouter(
+        prefix="/admin",
+        tags=["Admin"],
+        responses=RESPONSE_STANDARD_NOT_FOUND,
+    )
+
+    router.add_api_route(
+        path="/seed_identifiers/{seed_type}",
+        methods=["get"],
+        endpoint=_factory_list_seed_identifiers(repo=seed_data_repo),
+        include_in_schema=DISPLAY_IN_DOCS)
+
+    router.add_api_route(
+        path="/seed/{seed_type}/{identifier}",
+        methods=["get"],
+        endpoint=_factory_download_seed_file(repo=seed_data_repo),
+        include_in_schema=DISPLAY_IN_DOCS)
+
+    router.add_api_route(path="/enhance",
+                         methods=["post"],
+                         endpoint=_factory_enhance_seed(),
+                         include_in_schema=DISPLAY_IN_DOCS)
+
+    router.add_api_route(path="/save/{identifier}",
+                         methods=["post"],
+                         status_code=status.HTTP_201_CREATED,
+                         endpoint=_factory_save_seed(repo=seed_data_repo),
+                         include_in_schema=DISPLAY_IN_DOCS)
+
+    router.add_api_route(path="/delete/{identifier}",
+                         methods=["delete"],
+                         endpoint=_factory_delete_seed(repo=seed_data_repo),
+                         include_in_schema=DISPLAY_IN_DOCS)
+
+    return router

@@ -1,7 +1,10 @@
 from fastapi import APIRouter
-
+from src.domain.seed_data_filesystem_repository import \
+    SeedDataFilesystemRepository
+from src.paths import DATA_DIR
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
-from . import seeds, admin, raid_info
+
+from . import admin, raid_info, seeds
 
 router = APIRouter(
     prefix="/v0",
@@ -9,11 +12,13 @@ router = APIRouter(
     responses=RESPONSE_STANDARD_NOT_FOUND,
 )
 
-router.include_router(admin.router)
+seed_data_repo = SeedDataFilesystemRepository(base_path=DATA_DIR)
 
-router.include_router(seeds.router)
+router.include_router(admin.create_router(seed_data_repo=seed_data_repo))
 
-router.include_router(raid_info.router)
+router.include_router(seeds.create_router(seed_data_repo=seed_data_repo))
+
+router.include_router(raid_info.create_router(seed_data_repo=seed_data_repo))
 
 
 @router.get("/", include_in_schema=False)

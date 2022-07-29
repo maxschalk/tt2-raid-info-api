@@ -1,1 +1,1 @@
-from .raid_info import router
+from .raid_info import create_router

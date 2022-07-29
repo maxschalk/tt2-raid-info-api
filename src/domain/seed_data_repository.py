@@ -15,6 +15,7 @@ class SeedDataRepository(ABC):
     def list_seed_identifiers(
             self: SeedDataRepository,
             *,
+            seed_type: SeedType = SeedType.RAW,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
         pass
 

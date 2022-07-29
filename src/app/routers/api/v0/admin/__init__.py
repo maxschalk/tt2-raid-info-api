@@ -1,1 +1,1 @@
-from .admin import router
+from .admin import create_router

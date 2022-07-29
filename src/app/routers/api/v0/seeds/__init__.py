@@ -1,1 +1,1 @@
-from .seeds import router
+from .seeds import create_router
