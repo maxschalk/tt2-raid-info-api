@@ -95,7 +95,7 @@ def _generate_mock_seed_identifier() -> Iterator[str]:
     while True:
         valid_from = valid_from + datetime.timedelta(days=-7)
 
-        yield f"raid_seed_{valid_from.strftime('%Y%m%d')}_test"
+        yield f"raid_seed_{valid_from.strftime('%Y%m%d')}"
 
 
 GENERATOR_MOCK_SEED_IDENTIFIER = _generate_mock_seed_identifier()
@@ -177,6 +177,6 @@ if __name__ == '__main__':
     print("mock_consolidated_titan_part:", mock_consolidated_titan_part())
     print("mock_titan:", mock_titan())
     print("mock_enhanced_titan:", mock_enhanced_titan())
-    print("mock_raid_raw_seed_data:", mock_raid_info_raw())
-    print("mock_raid_enhanced_seed_data:", mock_raid_info_enhanced())
-    print("mock_raid_seed_data_filename:", mock_seed_identifier())
+    print("mock_raid_info_raw:", mock_raid_info_raw())
+    print("mock_raid_info_enhanced:", mock_raid_info_enhanced())
+    print("mock_seed_identifier:", mock_seed_identifier())
