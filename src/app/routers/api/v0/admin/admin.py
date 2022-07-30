@@ -86,9 +86,14 @@ def _factory_save_seed(*, repo: SeedDataRepository):
 
         _verify_authorization(secret=secret)
 
-        success = repo.save_seed(identifier=identifier,
-                                 data=data,
-                                 seed_type=SeedType.RAW)
+        enhanced = list(map(enhance_raid_info, data))
+
+        payload = (
+            (identifier, SeedType.RAW, data),
+            (identifier, SeedType.ENHANCED, enhanced),
+        )
+
+        success = repo.save_seeds(items=payload)
 
         if success:
             msg = f"Created seed '{identifier}'"
@@ -111,8 +116,12 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
                           secret: Optional[str] = Header(None)) -> Dict:
         _verify_authorization(secret=secret)
 
-        success = repo.delete_seed(identifier=identifier,
-                                   seed_type=SeedType.RAW)
+        payload = (
+            (identifier, SeedType.RAW),
+            (identifier, SeedType.ENHANCED),
+        )
+
+        success = repo.delete_seeds(items=payload)
 
         if success:
             msg = f"Deleted seed '{identifier}'"

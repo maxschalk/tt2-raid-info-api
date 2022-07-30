@@ -13,7 +13,7 @@ class SeedDataRepository(ABC):
 
     @abstractmethod
     def list_seed_identifiers(
-            self: SeedDataRepository,
+            self,
             *,
             seed_type: SeedType = SeedType.RAW,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
@@ -21,24 +21,23 @@ class SeedDataRepository(ABC):
 
     @abstractmethod
     def get_seed_identifier_by_week_offset(
-            self: SeedDataRepository,
+            self,
             *,
             seed_type: SeedType = SeedType.RAW,
             offset_weeks: int = 0) -> Optional[str]:
         pass
 
     @abstractmethod
-    def get_seed_by_identifier(
-            self: SeedDataRepository,
-            *,
-            identifier: str,
-            seed_type: SeedType = SeedType.RAW
-    ) -> Optional[List[RaidSeedData]]:
+    def get_seed_by_identifier(self,
+                               *,
+                               identifier: str,
+                               seed_type: SeedType = SeedType.RAW
+                               ) -> Optional[List[RaidSeedData]]:
         pass
 
     @abstractmethod
     def get_seed_by_week_offset(
-        self: SeedDataRepository,
+        self,
         *,
         seed_type: SeedType = SeedType.RAW,
         offset_weeks: int = 0,
@@ -47,7 +46,7 @@ class SeedDataRepository(ABC):
 
     @abstractmethod
     def list_seeds(
-        self: SeedDataRepository,
+        self,
         *,
         seed_type: SeedType = SeedType.RAW,
         sort_order: SortOrder = SortOrder.ASCENDING
@@ -55,11 +54,20 @@ class SeedDataRepository(ABC):
         pass
 
     @abstractmethod
-    def save_seed(self: SeedDataRepository, *, identifier: str,
-                  data: List[RaidSeedData], seed_type: SeedType) -> bool:
+    def save_seed(self, *, identifier: str, seed_type: SeedType,
+                  data: List[RaidSeedData]) -> bool:
         pass
 
     @abstractmethod
-    def delete_seed(self: SeedDataRepository, *, identifier: str,
-                    seed_type: SeedType) -> bool:
+    def save_seeds(
+            self, *, items: Tuple[Tuple[str, SeedType,
+                                        List[RaidSeedData]]]) -> bool:
+        pass
+
+    @abstractmethod
+    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> bool:
+        pass
+
+    @abstractmethod
+    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
         pass

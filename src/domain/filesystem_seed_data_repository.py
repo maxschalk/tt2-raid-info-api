@@ -19,9 +19,6 @@ def _load_from_json_file(*, filepath: Path) -> List[RaidSeedData]:
 
 
 def _save_to_json_file(*, filepath: Path, data: Any) -> bool:
-    if filepath.exists():
-        return False
-
     with open(filepath, mode='w', encoding='utf-8') as file:
         json.dump(jsonable_encoder(data), file)
 
@@ -39,7 +36,7 @@ class FSSeedDataRepository(SeedDataRepository):
         self.dir_enhanced: Path = self.base_path / SeedType.ENHANCED.value
 
     def list_seed_identifiers(
-            self: SeedDataRepository,
+            self,
             *,
             seed_type: SeedType = SeedType.RAW,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
@@ -55,7 +52,7 @@ class FSSeedDataRepository(SeedDataRepository):
         return tuple(sorted(id_iterator, reverse=reverse))
 
     def get_seed_identifier_by_week_offset(
-            self: SeedDataRepository,
+            self,
             *,
             seed_type: SeedType = SeedType.RAW,
             offset_weeks: int = 0) -> Optional[str]:
@@ -70,12 +67,11 @@ class FSSeedDataRepository(SeedDataRepository):
         except IndexError:
             return None
 
-    def get_seed_by_identifier(
-            self: SeedDataRepository,
-            *,
-            identifier: str,
-            seed_type: SeedType = SeedType.RAW
-    ) -> Optional[List[RaidSeedData]]:
+    def get_seed_by_identifier(self,
+                               *,
+                               identifier: str,
+                               seed_type: SeedType = SeedType.RAW
+                               ) -> Optional[List[RaidSeedData]]:
 
         filepath = self.base_path / seed_type.value / f"{identifier}.json"
 
@@ -85,7 +81,7 @@ class FSSeedDataRepository(SeedDataRepository):
         return _load_from_json_file(filepath=filepath)
 
     def get_seed_by_week_offset(
-        self: SeedDataRepository,
+        self,
         *,
         seed_type: SeedType = SeedType.RAW,
         offset_weeks: int = 0,
@@ -98,7 +94,7 @@ class FSSeedDataRepository(SeedDataRepository):
                                            seed_type=seed_type)
 
     def list_seeds(
-        self: SeedDataRepository,
+        self,
         *,
         seed_type: SeedType = SeedType.RAW,
         sort_order: SortOrder = SortOrder.ASCENDING
@@ -114,17 +110,34 @@ class FSSeedDataRepository(SeedDataRepository):
 
         return tuple(map(load_by_id, identifiers))
 
-    def save_seed(self: SeedDataRepository,
+    def save_seed(self,
                   *,
                   identifier: str,
-                  data: List[RaidSeedData],
-                  seed_type: SeedType = SeedType.RAW) -> bool:
+                  seed_type: SeedType = SeedType.RAW,
+                  data: List[RaidSeedData]) -> bool:
 
         filepath = self.base_path / seed_type.value / f"{identifier}.json"
 
+        if filepath.exists():
+            return False
+
         return _save_to_json_file(filepath=filepath, data=data)
 
-    def delete_seed(self: SeedDataRepository,
+    def save_seeds(
+            self, *, items: Tuple[Tuple[str, SeedType,
+                                        List[RaidSeedData]]]) -> bool:
+
+        def save_item(item: Tuple[str, SeedType, List[RaidSeedData]]) -> bool:
+
+            identifier, seed_type, data = item
+
+            return self.save_seed(identifier=identifier,
+                                  seed_type=seed_type,
+                                  data=data)
+
+        return all(list(map(save_item, items)))
+
+    def delete_seed(self,
                     *,
                     identifier: str,
                     seed_type: SeedType = SeedType.RAW) -> bool:
@@ -136,3 +149,13 @@ class FSSeedDataRepository(SeedDataRepository):
             return True
         except FileNotFoundError:
             return False
+
+    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
+
+        def delete_item(item: Tuple[str, SeedType]) -> bool:
+
+            identifier, seed_type = item
+
+            return self.delete_seed(identifier=identifier, seed_type=seed_type)
+
+        return all(list(map(delete_item, items)))

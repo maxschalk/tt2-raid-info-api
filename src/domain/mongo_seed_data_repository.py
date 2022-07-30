@@ -2,6 +2,7 @@ from typing import List, Literal, Optional, Tuple, Union
 
 import pymongo
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from src.domain.seed_data_repository import SeedDataRepository
 from src.model.raid_data import RaidSeedData
 from src.model.seed_type import SeedType
@@ -34,7 +35,10 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         self._client = self._connect()
 
+        self._db_name = db_name
         self._database = self._client[db_name]
+
+        self._collection_name = collection_name
         self._collection = self._database[collection_name]
 
     def _connect(self) -> MongoClient:
@@ -122,31 +126,109 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         return tuple(map(lambda r: r["data"], records))
 
-    def save_seed(self, *, identifier: str, data: List[RaidSeedData],
-                  seed_type: SeedType) -> bool:
+    def _save_seed(self,
+                   *,
+                   collection: Collection,
+                   identifier: str,
+                   seed_type: SeedType,
+                   data: List[RaidSeedData],
+                   session=None) -> bool:
 
-        if self._collection.count_documents({
+        if collection.count_documents({
                 "identifier": identifier,
                 "seed_type": seed_type.value
         }) > 0:
             return False
 
-        self._collection.insert_one({
-            "identifier":
-            identifier,
-            "seed_type":
-            seed_type.value,
-            "data":
-            list(map(lambda elem: elem.dict(), data))
-        })
+        collection.insert_one(
+            {
+                "identifier": identifier,
+                "seed_type": seed_type.value,
+                "data": list(map(lambda elem: elem.dict(), data))
+            },
+            session=session)
 
         return True
 
-    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> bool:
+    def save_seed(self, *, identifier: str, seed_type: SeedType,
+                  data: List[RaidSeedData]) -> bool:
 
-        result = self._collection.delete_one({
-            "identifier": identifier,
-            "seed_type": seed_type.value,
-        })
+        return self._save_seed(collection=self._collection,
+                               identifier=identifier,
+                               seed_type=seed_type,
+                               data=data)
+
+    def save_seeds(
+            self, *, items: Tuple[Tuple[str, SeedType,
+                                        List[RaidSeedData]]]) -> bool:
+
+        def callback(session) -> bool:
+            collection = session.client[self._db_name][self._collection_name]
+
+            for item in items:
+                identifier, seed_type, data = item
+
+                success = self._save_seed(collection=collection,
+                                          identifier=identifier,
+                                          seed_type=seed_type,
+                                          data=data,
+                                          session=session)
+
+                if success is False:
+                    raise Exception
+
+        with self._client.start_session() as session:
+            try:
+                transaction_success = session.with_transaction(
+                    callback=callback)
+            except Exception:
+                return False
+
+        return transaction_success
+
+    def _delete_seed(self,
+                     *,
+                     collection: Collection,
+                     identifier: str,
+                     seed_type: SeedType,
+                     session=None) -> bool:
+
+        result = collection.delete_one(
+            {
+                "identifier": identifier,
+                "seed_type": seed_type.value,
+            },
+            session=session)
 
         return result.deleted_count > 0
+
+    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> bool:
+
+        return self._delete_seed(collection=self._collection,
+                                 identifier=identifier,
+                                 seed_type=seed_type)
+
+    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
+
+        def callback(session) -> bool:
+            collection = session.client[self._db_name][self._collection_name]
+
+            for item in items:
+                identifier, seed_type = item
+
+                success = self._delete_seed(collection=collection,
+                                            identifier=identifier,
+                                            seed_type=seed_type,
+                                            session=session)
+
+                if success is False:
+                    raise Exception
+
+        with self._client.start_session() as session:
+            try:
+                transaction_success = session.with_transaction(
+                    callback=callback)
+            except Exception:
+                return False
+
+        return transaction_success
