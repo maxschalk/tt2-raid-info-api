@@ -57,9 +57,11 @@ class SeedDataFilesystemRepository(SeedDataRepository):
     def get_seed_identifier_by_week_offset(
             self: SeedDataRepository,
             *,
+            seed_type: SeedType = SeedType.RAW,
             offset_weeks: int = 0) -> Optional[str]:
 
-        ids = self.list_seed_identifiers(sort_order=SortOrder.DESCENDING)
+        ids = self.list_seed_identifiers(seed_type=seed_type,
+                                         sort_order=SortOrder.DESCENDING)
 
         offset_weeks = abs(offset_weeks)
 
@@ -83,10 +85,10 @@ class SeedDataFilesystemRepository(SeedDataRepository):
         return _load_from_json_file(filepath=filepath)
 
     def get_seed_by_week_offset(
-            self: SeedDataRepository,
-            *,
-            offset_weeks: int = 0,
-            seed_type: SeedType = SeedType.RAW
+        self: SeedDataRepository,
+        *,
+        seed_type: SeedType = SeedType.RAW,
+        offset_weeks: int = 0,
     ) -> Optional[List[RaidSeedData]]:
 
         identifier = self.get_seed_identifier_by_week_offset(
@@ -125,7 +127,7 @@ class SeedDataFilesystemRepository(SeedDataRepository):
     def delete_seed(self: SeedDataRepository,
                     *,
                     identifier: str,
-                    seed_type: SeedType = SeedType.RAW) -> None:
+                    seed_type: SeedType = SeedType.RAW) -> bool:
 
         filepath = self.base_path / seed_type.value / f"{identifier}.json"
 

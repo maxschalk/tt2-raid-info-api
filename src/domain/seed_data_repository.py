@@ -23,6 +23,7 @@ class SeedDataRepository(ABC):
     def get_seed_identifier_by_week_offset(
             self: SeedDataRepository,
             *,
+            seed_type: SeedType = SeedType.RAW,
             offset_weeks: int = 0) -> Optional[str]:
         pass
 
@@ -37,10 +38,10 @@ class SeedDataRepository(ABC):
 
     @abstractmethod
     def get_seed_by_week_offset(
-            self: SeedDataRepository,
-            *,
-            offset_weeks: int = 0,
-            seed_type: SeedType = SeedType.RAW
+        self: SeedDataRepository,
+        *,
+        seed_type: SeedType = SeedType.RAW,
+        offset_weeks: int = 0,
     ) -> Optional[List[RaidSeedData]]:
         pass
 
@@ -54,16 +55,11 @@ class SeedDataRepository(ABC):
         pass
 
     @abstractmethod
-    def save_seed(self: SeedDataRepository,
-                  *,
-                  identifier: str,
-                  data: List[RaidSeedData],
-                  seed_type: SeedType = SeedType.RAW) -> bool:
+    def save_seed(self: SeedDataRepository, *, identifier: str,
+                  data: List[RaidSeedData], seed_type: SeedType) -> bool:
         pass
 
     @abstractmethod
-    def delete_seed(self: SeedDataRepository,
-                    *,
-                    identifier: str,
-                    seed_type: SeedType = SeedType.RAW) -> None:
+    def delete_seed(self: SeedDataRepository, *, identifier: str,
+                    seed_type: SeedType) -> bool:
         pass
