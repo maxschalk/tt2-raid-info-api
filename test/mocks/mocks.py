@@ -37,11 +37,15 @@ def mock_enhanced_titan_part() -> EnhancedTitanPart:
 
 
 def mock_consolidated_titan_part() -> ConsolidatedTitanPart:
+    armor_hp = choice((fake.pyfloat(), fake.pyint()))
+
+    body_hp = choice((fake.pyfloat(), fake.pyint()))
+
     return ConsolidatedTitanPart(part_id=mock_titan_anatomy().value,
-                                 armor_hp=choice(
-                                     (fake.pyfloat(), fake.pyint())),
-                                 body_hp=choice(
-                                     (fake.pyfloat(), fake.pyint())),
+                                 armor_hp=armor_hp,
+                                 armor_hp_formatted=str(armor_hp),
+                                 body_hp=body_hp,
+                                 body_hp_formatted=str(body_hp),
                                  armor_cursed=fake.pybool(),
                                  body_cursed=fake.pybool())
 
@@ -56,19 +60,25 @@ def mock_titan() -> Titan:
 
 
 def mock_enhanced_titan() -> EnhancedTitan:
+    total_hp = fake.pyfloat()
+    total_armor_hp = choice((fake.pyfloat(), fake.pyint()))
+    total_body_hp = choice((fake.pyfloat(), fake.pyint()))
+    skippable_hp = choice((fake.pyfloat(), fake.pyint()))
+
     return EnhancedTitan(
         enemy_id=fake.pystr(),
         enemy_name=fake.pystr(),
-        total_hp=fake.pyfloat(),
+        total_hp=total_hp,
+        total_hp_formatted=str(total_hp),
         parts=[mock_enhanced_titan_part() for _ in range(randint(0, 3))],
         area_debuffs=[mock_buff() for _ in range(randint(0, 3))],
         cursed_debuffs=[mock_buff() for _ in range(randint(0, 3))],
-        total_armor_hp=choice((fake.pyfloat(), fake.pyint())),
-        total_armor_hp_formatted=fake.pystr(),
-        total_body_hp=choice((fake.pyfloat(), fake.pyint())),
-        total_body_hp_formatted=fake.pystr(),
-        skippable_hp=choice((fake.pyfloat(), fake.pyint())),
-        skippable_hp_formatted=fake.pystr(),
+        total_armor_hp=total_armor_hp,
+        total_armor_hp_formatted=str(total_armor_hp),
+        total_body_hp=total_body_hp,
+        total_body_hp_formatted=str(total_body_hp),
+        skippable_hp=skippable_hp,
+        skippable_hp_formatted=str(skippable_hp),
         consolidated_parts=[
             mock_consolidated_titan_part() for _ in range(randint(3, 10))
         ],
