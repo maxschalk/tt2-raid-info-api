@@ -20,6 +20,14 @@ def _get_pymongo_sort_order(
     return None
 
 
+class SeedDuplicateError(Exception):
+    pass
+
+
+class SeedNotFoundError(Exception):
+    pass
+
+
 class MongoSeedDataRepository(SeedDataRepository):
 
     _connection_string_template = ("mongodb+srv://"
@@ -92,7 +100,7 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         try:
             return record["data"]
-        except KeyError:
+        except (KeyError, TypeError):
             return None
 
     def get_seed_by_week_offset(
@@ -134,10 +142,12 @@ class MongoSeedDataRepository(SeedDataRepository):
                    data: List[RaidSeedData],
                    session=None) -> bool:
 
-        if collection.count_documents({
+        if collection.count_documents(
+            {
                 "identifier": identifier,
                 "seed_type": seed_type.value
-        }) > 0:
+            },
+                session=session) > 0:
             return False
 
         collection.insert_one(
@@ -162,7 +172,7 @@ class MongoSeedDataRepository(SeedDataRepository):
             self, *, items: Tuple[Tuple[str, SeedType,
                                         List[RaidSeedData]]]) -> bool:
 
-        def callback(session) -> bool:
+        def callback(session) -> None:
             collection = session.client[self._db_name][self._collection_name]
 
             for item in items:
@@ -175,16 +185,16 @@ class MongoSeedDataRepository(SeedDataRepository):
                                           session=session)
 
                 if success is False:
-                    raise Exception
+                    raise Exception(
+                        f"Failed to save seed {identifier}.{seed_type}")
 
         with self._client.start_session() as session:
             try:
-                transaction_success = session.with_transaction(
-                    callback=callback)
+                session.with_transaction(callback=callback)
             except Exception:
                 return False
 
-        return transaction_success
+        return True
 
     def _delete_seed(self,
                      *,
@@ -210,7 +220,7 @@ class MongoSeedDataRepository(SeedDataRepository):
 
     def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
 
-        def callback(session) -> bool:
+        def callback(session) -> None:
             collection = session.client[self._db_name][self._collection_name]
 
             for item in items:
@@ -226,9 +236,8 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         with self._client.start_session() as session:
             try:
-                transaction_success = session.with_transaction(
-                    callback=callback)
+                session.with_transaction(callback=callback)
             except Exception:
                 return False
 
-        return transaction_success
+        return True
