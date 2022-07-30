@@ -28,7 +28,7 @@ def _save_to_json_file(*, filepath: Path, data: Any) -> bool:
     return True
 
 
-class SeedDataFilesystemRepository(SeedDataRepository):
+class FSSeedDataRepository(SeedDataRepository):
 
     def __init__(self, *, base_path: Union[str, Path]) -> None:
         super().__init__()

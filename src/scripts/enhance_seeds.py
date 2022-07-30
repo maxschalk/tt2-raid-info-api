@@ -1,8 +1,8 @@
 import os
 from typing import List
 
-from src.domain.seed_data_filesystem_repository import \
-    SeedDataFilesystemRepository
+from src.domain.filesystem_seed_data_repository import \
+    FSSeedDataRepository
 from src.model.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
                                  EnhancedTitanPart, RaidSeedDataRaw, Titan,
                                  TitanPart)
@@ -14,7 +14,7 @@ from src.utils import selectors
 from src.utils.format_hp import format_healthpoints
 from src.utils.temp_deepcopy import temp_deepcopy
 
-seed_data_repo = SeedDataFilesystemRepository(base_path=DATA_DIR)
+seed_data_repo = FSSeedDataRepository(base_path=DATA_DIR)
 
 
 def main():

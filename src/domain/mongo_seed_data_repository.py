@@ -19,7 +19,7 @@ def _get_pymongo_sort_order(
     return None
 
 
-class SeedDataMongoRepository(SeedDataRepository):
+class MongoSeedDataRepository(SeedDataRepository):
 
     _connection_string_template = ("mongodb+srv://"
                                    "{username}:{password}"

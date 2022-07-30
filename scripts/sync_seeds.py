@@ -2,8 +2,8 @@ import json
 from test.utils.make_request import make_request_sync
 
 import requests
-from src.domain.seed_data_filesystem_repository import \
-    SeedDataFilesystemRepository
+from src.domain.filesystem_seed_data_repository import \
+    FSSeedDataRepository
 from src.model.seed_type import SeedType
 from src.paths import DATA_DIR
 from src.scripts.enhance_seeds import main as enhance_seeds
@@ -11,7 +11,7 @@ from src.stage import Stage
 
 STAGE = Stage.PRODUCTION
 
-seed_data_repo = SeedDataFilesystemRepository(base_path=DATA_DIR)
+seed_data_repo = FSSeedDataRepository(base_path=DATA_DIR)
 
 
 def sync_down():
