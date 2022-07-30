@@ -1,12 +1,11 @@
 from typing import Dict, List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from src.domain.seed_data_repository import SeedDataRepository
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
-from src.scripts.enhance_seeds import enhance_raid_info
+from src.scripts.enhance_seeds import enhance_seed_data
 from src.utils.get_env import get_env
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.sort_order import SortOrder
@@ -64,8 +63,7 @@ def _factory_enhance_seed():
         data: List[RaidSeedDataRaw],
     ) -> Union[StreamingResponse, List[RaidSeedDataEnhanced]]:
 
-        enhanced_seed_data = list(
-            map(enhance_raid_info, jsonable_encoder(data)))
+        enhanced_seed_data = enhance_seed_data(data=data)
 
         if download:
             return create_stream_response(data=enhanced_seed_data,
@@ -86,7 +84,7 @@ def _factory_save_seed(*, repo: SeedDataRepository):
 
         _verify_authorization(secret=secret)
 
-        enhanced = list(map(enhance_raid_info, data))
+        enhanced = enhance_seed_data(data=data)
 
         payload = (
             (identifier, SeedType.RAW, data),
@@ -95,13 +93,13 @@ def _factory_save_seed(*, repo: SeedDataRepository):
 
         success = repo.save_seeds(items=payload)
 
-        if success:
-            msg = f"Created seed '{identifier}'"
-        else:
-            msg = f"Seed '{identifier}' already exists"
+        if success is False:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to seed '{identifier}', it might already exist")
 
         return {
-            "detail": msg,
+            "detail": f"Saved seed '{identifier}'",
             "identifier": identifier,
             "success": success,
         }
@@ -123,14 +121,14 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
 
         success = repo.delete_seeds(items=payload)
 
-        if success:
-            msg = f"Deleted seed '{identifier}'"
-        else:
-            msg = f"Seed '{identifier}' does not exist"
+        if success is False:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to delete '{identifier}', it might not exist")
 
         return {
-            "detail": msg,
-            "filename": identifier,
+            "detail": f"Deleted seed '{identifier}'",
+            "identifier": identifier,
             "success": success,
         }
 
