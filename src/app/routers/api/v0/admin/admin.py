@@ -2,7 +2,9 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import StreamingResponse
-from src.domain.seed_data_repository import SeedDataRepository
+from src.domain.seed_data_repository import (SeedDataRepository,
+                                             SeedDuplicateError,
+                                             SeedNotFoundError)
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
 from src.scripts.enhance_seeds import enhance_seed_data
@@ -91,17 +93,15 @@ def _factory_save_seed(*, repo: SeedDataRepository):
             (identifier, SeedType.ENHANCED, enhanced),
         )
 
-        success = repo.save_seeds(items=payload)
-
-        if success is False:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to seed '{identifier}', it might already exist")
+        try:
+            repo.save_seeds(items=payload)
+        except SeedDuplicateError as err:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=str(err)) from err
 
         return {
-            "detail": f"Saved seed '{identifier}'",
+            "detail": f"Saved seed {identifier}.{SeedType.RAW.value}",
             "identifier": identifier,
-            "success": success,
         }
 
     return save_seed
@@ -119,17 +119,15 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
             (identifier, SeedType.ENHANCED),
         )
 
-        success = repo.delete_seeds(items=payload)
-
-        if success is False:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to delete '{identifier}', it might not exist")
+        try:
+            repo.delete_seeds(items=payload)
+        except SeedNotFoundError as err:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=str(err)) from err
 
         return {
-            "detail": f"Deleted seed '{identifier}'",
+            "detail": f"Deleted seed {identifier}.{SeedType.RAW.value}",
             "identifier": identifier,
-            "success": success,
         }
 
     return delete_seed

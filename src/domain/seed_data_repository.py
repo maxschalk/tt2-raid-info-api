@@ -9,6 +9,14 @@ from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
 
+class SeedDuplicateError(Exception):
+    pass
+
+
+class SeedNotFoundError(Exception):
+    pass
+
+
 class SeedDataRepository(ABC):
 
     @abstractmethod
@@ -55,19 +63,19 @@ class SeedDataRepository(ABC):
 
     @abstractmethod
     def save_seed(self, *, identifier: str, seed_type: SeedType,
-                  data: List[RaidSeedData]) -> bool:
+                  data: List[RaidSeedData]) -> None:
         pass
 
     @abstractmethod
     def save_seeds(
             self, *, items: Tuple[Tuple[str, SeedType,
-                                        List[RaidSeedData]]]) -> bool:
+                                        List[RaidSeedData]]]) -> None:
         pass
 
     @abstractmethod
-    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> bool:
+    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> None:
         pass
 
     @abstractmethod
-    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
+    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> None:
         pass

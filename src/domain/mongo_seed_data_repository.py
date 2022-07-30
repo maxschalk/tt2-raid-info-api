@@ -3,13 +3,15 @@ from typing import List, Literal, Optional, Tuple, Union
 import pymongo
 from pymongo import MongoClient
 from pymongo.collection import Collection
-from src.domain.seed_data_repository import SeedDataRepository
+from src.domain.seed_data_repository import (SeedDataRepository,
+                                             SeedDuplicateError,
+                                             SeedNotFoundError)
 from src.model.raid_data import RaidSeedData
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
 
-def _get_pymongo_sort_order(
+def _map_pymongo_sort_order(
         *, sort_order: SortOrder) -> Optional[Union[Literal[1], Literal[-1]]]:
     if sort_order == SortOrder.ASCENDING:
         return pymongo.ASCENDING
@@ -18,14 +20,6 @@ def _get_pymongo_sort_order(
         return pymongo.DESCENDING
 
     return None
-
-
-class SeedDuplicateError(Exception):
-    pass
-
-
-class SeedNotFoundError(Exception):
-    pass
 
 
 class MongoSeedDataRepository(SeedDataRepository):
@@ -43,7 +37,7 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         self._client = self._connect()
 
-        self._db_name = db_name
+        self._database_name = db_name
         self._database = self._client[db_name]
 
         self._collection_name = collection_name
@@ -56,13 +50,16 @@ class MongoSeedDataRepository(SeedDataRepository):
         if self._client:
             self._client.close()
 
+    def _teardown_db(self) -> None:
+        self._client.drop_database(self._database)
+
     def list_seed_identifiers(
             self,
             *,
             seed_type: SeedType = SeedType.RAW,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
 
-        db_sort_order = _get_pymongo_sort_order(sort_order=sort_order)
+        db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
 
         records = self._collection.find({
             "seed_type": seed_type.value
@@ -126,7 +123,7 @@ class MongoSeedDataRepository(SeedDataRepository):
         sort_order: SortOrder = SortOrder.ASCENDING
     ) -> Tuple[List[RaidSeedData]]:
 
-        db_sort_order = _get_pymongo_sort_order(sort_order=sort_order)
+        db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
 
         records = self._collection.find({
             "seed_type": seed_type.value
@@ -140,7 +137,7 @@ class MongoSeedDataRepository(SeedDataRepository):
                    identifier: str,
                    seed_type: SeedType,
                    data: List[RaidSeedData],
-                   session=None) -> bool:
+                   session=None) -> None:
 
         if collection.count_documents(
             {
@@ -148,7 +145,8 @@ class MongoSeedDataRepository(SeedDataRepository):
                 "seed_type": seed_type.value
             },
                 session=session) > 0:
-            return False
+            raise SeedDuplicateError(
+                f"Seed {identifier}.{seed_type.value} already exists")
 
         collection.insert_one(
             {
@@ -158,86 +156,71 @@ class MongoSeedDataRepository(SeedDataRepository):
             },
             session=session)
 
-        return True
-
     def save_seed(self, *, identifier: str, seed_type: SeedType,
-                  data: List[RaidSeedData]) -> bool:
+                  data: List[RaidSeedData]) -> None:
 
-        return self._save_seed(collection=self._collection,
-                               identifier=identifier,
-                               seed_type=seed_type,
-                               data=data)
+        self._save_seed(collection=self._collection,
+                        identifier=identifier,
+                        seed_type=seed_type,
+                        data=data)
 
     def save_seeds(
             self, *, items: Tuple[Tuple[str, SeedType,
-                                        List[RaidSeedData]]]) -> bool:
+                                        List[RaidSeedData]]]) -> None:
 
         def callback(session) -> None:
-            collection = session.client[self._db_name][self._collection_name]
+            collection = session.client[self._database_name][
+                self._collection_name]
 
             for item in items:
                 identifier, seed_type, data = item
 
-                success = self._save_seed(collection=collection,
-                                          identifier=identifier,
-                                          seed_type=seed_type,
-                                          data=data,
-                                          session=session)
-
-                if success is False:
-                    raise Exception(
-                        f"Failed to save seed {identifier}.{seed_type}")
+                self._save_seed(collection=collection,
+                                identifier=identifier,
+                                seed_type=seed_type,
+                                data=data,
+                                session=session)
 
         with self._client.start_session() as session:
-            try:
-                session.with_transaction(callback=callback)
-            except Exception:
-                return False
-
-        return True
+            session.with_transaction(callback=callback)
 
     def _delete_seed(self,
                      *,
                      collection: Collection,
                      identifier: str,
                      seed_type: SeedType,
-                     session=None) -> bool:
+                     session=None) -> None:
 
-        result = collection.delete_one(
+        record = collection.find_one_and_delete(
             {
                 "identifier": identifier,
-                "seed_type": seed_type.value,
+                "seed_type": seed_type.value
             },
             session=session)
 
-        return result.deleted_count > 0
+        if record is None:
+            raise SeedNotFoundError(
+                f"Seed {identifier}.{seed_type.value} not found")
 
-    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> bool:
+    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> None:
 
-        return self._delete_seed(collection=self._collection,
-                                 identifier=identifier,
-                                 seed_type=seed_type)
+        self._delete_seed(collection=self._collection,
+                          identifier=identifier,
+                          seed_type=seed_type)
 
-    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> bool:
+    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> None:
 
         def callback(session) -> None:
-            collection = session.client[self._db_name][self._collection_name]
+            collection = session.client[self._database_name][
+                self._collection_name]
 
             for item in items:
                 identifier, seed_type = item
 
-                success = self._delete_seed(collection=collection,
-                                            identifier=identifier,
-                                            seed_type=seed_type,
-                                            session=session)
-
-                if success is False:
-                    raise Exception
+                self._delete_seed(collection=collection,
+                                  identifier=identifier,
+                                  seed_type=seed_type,
+                                  session=session)
 
         with self._client.start_session() as session:
-            try:
-                session.with_transaction(callback=callback)
-            except Exception:
-                return False
-
-        return True
+            session.with_transaction(callback=callback)
