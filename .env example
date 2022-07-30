@@ -1,2 +1,9 @@
 STAGE=dev|staging|prod
 TT2_RAID_API_KEY=privatekey
+
+MONGO_URL=mongoinstance
+MONGO_USERNAME=username
+MONGO_PASSWORD=password
+
+MONGO_DB_NAME=dev
+MONGO_COLLECTION_NAME=seeds
