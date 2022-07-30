@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from src.domain.seed_data_repository import SeedDataRepository
-from src.model.raid_data import RaidInfo
+from src.model.raid_data import RaidInfo, map_to_native_object
 from src.model.seed_type import SeedType
 from src.utils import selectors
 
@@ -26,7 +26,7 @@ def _factory_raid_info_by_tier_level(*, repo: SeedDataRepository):
         )
 
         payload = selectors.select_first_by(
-            data=seed_data,
+            data=map_to_native_object(data=seed_data),
             selectors_and_validators=selectors_and_validators,
         )
 

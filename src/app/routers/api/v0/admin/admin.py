@@ -5,7 +5,8 @@ from fastapi.responses import StreamingResponse
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import RaidSeedEnhanced, RaidSeedRaw
+from src.model.raid_data import (RaidSeedEnhanced, RaidSeedRaw,
+                                 map_to_native_object)
 from src.model.seed_type import SeedType
 from src.scripts.enhance_seeds import enhance_seed_data
 from src.utils.get_env import get_env
@@ -68,8 +69,9 @@ def _factory_enhance_seed():
         enhanced_seed_data = enhance_seed_data(data=data)
 
         if download:
-            return create_stream_response(data=enhanced_seed_data,
-                                          filename="enhanced_custom_seed.json")
+            return create_stream_response(
+                data=map_to_native_object(data=enhanced_seed_data),
+                filename="enhanced_custom_seed.json")
 
         return enhanced_seed_data
 

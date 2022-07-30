@@ -6,7 +6,7 @@ from pymongo.collection import Collection
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import RaidSeed
+from src.model.raid_data import RaidSeed, map_to_raid_seed
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -95,10 +95,7 @@ class MongoSeedDataRepository(SeedDataRepository):
             "seed_type": seed_type.value
         })
 
-        try:
-            return record["data"]
-        except (KeyError, TypeError):
-            return None
+        return map_to_raid_seed(data=record["data"], seed_type=seed_type)
 
     def get_seed_by_week_offset(
         self,
@@ -128,7 +125,10 @@ class MongoSeedDataRepository(SeedDataRepository):
             "seed_type": seed_type.value
         }).sort("identifier", db_sort_order)
 
-        return tuple(map(lambda r: r["data"], records))
+        return tuple(
+            map(
+                lambda r: map_to_raid_seed(data=r["data"], seed_type=seed_type
+                                           ), records))
 
     def _save_seed(self,
                    *,
