@@ -1,5 +1,5 @@
 import json
-from test.mocks.mocks import mock_raid_raw_seed_data
+from test.mocks.mocks import mock_raid_info_raw
 from test.utils.make_request import make_request_sync
 from typing import List, Tuple
 
@@ -14,7 +14,7 @@ from src.utils import selectors
 
 @pytest.fixture(scope="module", autouse=True)
 def posted_seeds(stage: Stage) -> List[Tuple[str, RaidInfoRaw]]:
-    mocked_seeds = [[mock_raid_raw_seed_data() for _ in range(140)]
+    mocked_seeds = [[mock_raid_info_raw() for _ in range(140)]
                     for _ in range(2)]
 
     def filename_from_seed(seed):

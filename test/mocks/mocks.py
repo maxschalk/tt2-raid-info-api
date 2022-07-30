@@ -6,13 +6,14 @@ from typing import Iterator
 from faker import Faker
 from src.model.raid_data import (Buff, ConsolidatedTitanPart, EnhancedTitan,
                                  EnhancedTitanPart, RaidInfoEnhanced,
-                                 RaidInfoRaw, Titan, TitanPart)
+                                 RaidInfoRaw, RaidSeedEnhanced, RaidSeedRaw,
+                                 Titan, TitanPart)
 from src.model.titan_anatomy import TITAN_PARTS_ATOMIC, TitanAnatomy
 
 fake = Faker()
-Faker.seed(0)
+Faker.seed(42)
 
-random.seed(0)
+random.seed(42)
 
 
 def mock_buff() -> Buff:
@@ -88,7 +89,23 @@ def mock_enhanced_titan() -> EnhancedTitan:
         number_of_cursed_parts=fake.pyint())
 
 
-def _mock_raid_raw_seed_data_gen() -> Iterator[RaidInfoRaw]:
+def _generate_mock_seed_identifier() -> Iterator[str]:
+    valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
+
+    while True:
+        valid_from = valid_from + datetime.timedelta(days=-7)
+
+        yield f"raid_seed_{valid_from.strftime('%Y%m%d')}_test"
+
+
+GENERATOR_MOCK_SEED_IDENTIFIER = _generate_mock_seed_identifier()
+
+
+def mock_seed_identifier() -> str:
+    return next(GENERATOR_MOCK_SEED_IDENTIFIER)
+
+
+def _generate_mock_raid_info_raw() -> Iterator[RaidInfoRaw]:
     valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
 
     while True:
@@ -110,14 +127,14 @@ def _mock_raid_raw_seed_data_gen() -> Iterator[RaidInfoRaw]:
             area_buffs=[mock_buff() for _ in range(randint(3, 10))])
 
 
-MOCK_RAID_RAW_SEED_DATA_GEN = _mock_raid_raw_seed_data_gen()
+GENERATOR_MOCK_RAID_INFO_RAW = _generate_mock_raid_info_raw()
 
 
-def mock_raid_raw_seed_data() -> RaidInfoRaw:
-    return next(MOCK_RAID_RAW_SEED_DATA_GEN)
+def mock_raid_info_raw() -> RaidInfoRaw:
+    return next(GENERATOR_MOCK_RAID_INFO_RAW)
 
 
-def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidInfoEnhanced]:
+def _generate_mock_raid_info_enhanced() -> Iterator[RaidInfoEnhanced]:
     valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
 
     while True:
@@ -137,27 +154,19 @@ def _mock_raid_enhanced_seed_data_gen() -> Iterator[RaidInfoEnhanced]:
             titans=[mock_enhanced_titan() for _ in range(randint(3, 10))])
 
 
-MOCK_RAID_ENHANCED_SEED_DATA_GEN = _mock_raid_enhanced_seed_data_gen()
+GENERATOR_MOCK_RAID_INFO_ENHANCED = _generate_mock_raid_info_enhanced()
 
 
-def mock_raid_enhanced_seed_data() -> RaidInfoEnhanced:
-    return next(MOCK_RAID_ENHANCED_SEED_DATA_GEN)
+def mock_raid_info_enhanced() -> RaidInfoEnhanced:
+    return next(GENERATOR_MOCK_RAID_INFO_ENHANCED)
 
 
-def _mock_raid_seed_data_filename_gen() -> Iterator[str]:
-    valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
-
-    while True:
-        valid_from = valid_from + datetime.timedelta(days=-7)
-
-        yield f"raid_seed_{valid_from.strftime('%Y%m%d')}_test.json"
+def mock_raid_seed_raw(length: int = 2) -> RaidSeedRaw:
+    return [mock_raid_info_raw() for _ in range(length)]
 
 
-MOCK_RAID_SEED_DATA_FILENAME_GEN = _mock_raid_seed_data_filename_gen()
-
-
-def mock_raid_seed_data_filename() -> str:
-    return next(MOCK_RAID_SEED_DATA_FILENAME_GEN)
+def mock_raid_seed_enhanced(length: int = 2) -> RaidSeedEnhanced:
+    return [mock_raid_info_enhanced() for _ in range(length)]
 
 
 if __name__ == '__main__':
@@ -168,6 +177,6 @@ if __name__ == '__main__':
     print("mock_consolidated_titan_part:", mock_consolidated_titan_part())
     print("mock_titan:", mock_titan())
     print("mock_enhanced_titan:", mock_enhanced_titan())
-    print("mock_raid_raw_seed_data:", mock_raid_raw_seed_data())
-    print("mock_raid_enhanced_seed_data:", mock_raid_enhanced_seed_data())
-    print("mock_raid_seed_data_filename:", mock_raid_seed_data_filename())
+    print("mock_raid_raw_seed_data:", mock_raid_info_raw())
+    print("mock_raid_enhanced_seed_data:", mock_raid_info_enhanced())
+    print("mock_raid_seed_data_filename:", mock_seed_identifier())
