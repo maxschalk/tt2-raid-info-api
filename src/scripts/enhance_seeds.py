@@ -1,52 +1,28 @@
-import os
 from typing import List
 
-from src.domain.filesystem_seed_data_repository import \
-    FSSeedDataRepository
+from fastapi.encoders import jsonable_encoder
 from src.model.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
-                                 EnhancedTitanPart, RaidSeedDataRaw, Titan,
-                                 TitanPart)
-from src.model.seed_type import SeedType
+                                 EnhancedTitanPart, RaidSeedDataEnhanced,
+                                 RaidSeedDataRaw, Titan, TitanPart)
 from src.model.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                      TITAN_PARTS_ATOMIC)
-from src.paths import DATA_DIR, ENHANCED_SEEDS_DIR, RAW_SEEDS_DIR
 from src.utils import selectors
 from src.utils.format_hp import format_healthpoints
-from src.utils.temp_deepcopy import temp_deepcopy
-
-seed_data_repo = FSSeedDataRepository(base_path=DATA_DIR)
 
 
-def main():
-    raw_seed_paths = set(
-        seed_data_repo.list_seed_identifiers(seed_type=SeedType.RAW))
-    enhanced_seed_paths = set(
-        seed_data_repo.list_seed_identifiers(seed_type=SeedType.ENHANCED))
+def enhance_seed_data(
+        *, data: List[RaidSeedDataRaw]) -> List[RaidSeedDataEnhanced]:
 
-    delete_seed_ids = enhanced_seed_paths - raw_seed_paths
+    jsonable = map(jsonable_encoder, data)
 
-    enhance_seed_ids = raw_seed_paths - enhanced_seed_paths
+    enhanced = map(_enhance_raid_info, jsonable)
 
-    for seed_id in delete_seed_ids:
-        seed_data_repo.delete_seed(identifier=seed_id,
-                                   seed_type=SeedType.ENHANCED)
+    objects = map(lambda elem: RaidSeedDataEnhanced(**elem), enhanced)
 
-    for seed_id in enhance_seed_ids:
-        raw_seed_data = seed_data_repo.get_seed_by_identifier(
-            identifier=seed_id, seed_type=SeedType.RAW)
-
-        enhanced_seed_data = list(
-            map(enhance_raid_info, temp_deepcopy(raw_seed_data)))
-
-        success = seed_data_repo.save_seed(identifier=seed_id,
-                                           seed_type=SeedType.ENHANCED,
-                                           data=enhanced_seed_data)
-
-        if not success:
-            print(f"Could not enhance {seed_id}")
+    return list(objects)
 
 
-def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
+def _enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataEnhanced:
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
     raid_info['raid_total_target_hp_formatted'] = format_healthpoints(
@@ -54,14 +30,14 @@ def enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataRaw:
 
     raid_info_titans = selectors.raid_titans(raid_info)
 
-    enhanced_titans = list(map(enhance_titan_info, raid_info_titans))
+    enhanced_titans = list(map(_enhance_titan_info, raid_info_titans))
 
     raid_info['titans'] = enhanced_titans
 
     return raid_info
 
 
-def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
+def _enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
     titan_total_hp = selectors.titan_total_hp(titan_info)
     titan_info['total_hp_formatted'] = format_healthpoints(titan_total_hp)
 
@@ -81,10 +57,10 @@ def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
         titan_skippable_hp)
 
     titan_info_parts = selectors.titan_parts(titan_info)
-    enhanced_parts = list(map(enhance_titan_part, titan_info_parts))
+    enhanced_parts = list(map(_enhance_titan_part, titan_info_parts))
     titan_info['parts'] = enhanced_parts
 
-    consolidated_parts = consolidated_titan_parts(titan_info)
+    consolidated_parts = _consolidated_titan_parts(titan_info)
     titan_info['consolidated_parts'] = consolidated_parts
 
     cursed_parts = selectors.titan_cursed_parts(titan_info)
@@ -94,7 +70,7 @@ def enhance_titan_info(titan_info: Titan) -> EnhancedTitan:
     return titan_info
 
 
-def enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
+def _enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
     titan_part_total_hp = selectors.titan_part_hp(titan_part_info)
     titan_part_info['total_hp_formatted'] = format_healthpoints(
         titan_part_total_hp)
@@ -105,7 +81,8 @@ def enhance_titan_part(titan_part_info: TitanPart) -> EnhancedTitanPart:
     return titan_part_info
 
 
-def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
+def _consolidated_titan_parts(
+        titan_info: Titan) -> List[ConsolidatedTitanPart]:
     titan_parts = selectors.titan_parts(titan_info)
 
     consolidated_parts = []
@@ -150,7 +127,3 @@ def consolidated_titan_parts(titan_info: Titan) -> List[ConsolidatedTitanPart]:
         consolidated_parts.append(consolidated_part)
 
     return consolidated_parts
-
-
-if __name__ == '__main__':
-    main()
