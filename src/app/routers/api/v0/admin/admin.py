@@ -7,7 +7,6 @@ from src.domain.seed_data_repository import SeedDataRepository
 from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
 from src.model.seed_type import SeedType
 from src.scripts.enhance_seeds import enhance_raid_info
-from src.scripts.enhance_seeds import main as enhance_seeds
 from src.utils.get_env import get_env
 from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.sort_order import SortOrder
@@ -92,7 +91,6 @@ def _factory_save_seed(*, repo: SeedDataRepository):
                                  seed_type=SeedType.RAW)
 
         if success:
-            enhance_seeds()
             msg = f"Created seed '{identifier}'"
         else:
             msg = f"Seed '{identifier}' already exists"
@@ -117,7 +115,6 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
                                    seed_type=SeedType.RAW)
 
         if success:
-            enhance_seeds()
             msg = f"Deleted seed '{identifier}'"
         else:
             msg = f"Seed '{identifier}' does not exist"
