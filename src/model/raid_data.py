@@ -1,7 +1,9 @@
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
+from fastapi.encoders import jsonable_encoder
 # pylint: disable=no-name-in-module
 from pydantic import BaseModel, StrictStr
+from src.model.seed_type import SeedType
 
 
 class Buff(BaseModel):
@@ -97,3 +99,19 @@ RaidSeedRaw = List[RaidInfoRaw]
 RaidSeedEnhanced = List[RaidInfoEnhanced]
 
 RaidSeed = Union[RaidSeedRaw, RaidInfoEnhanced]
+
+
+def map_to_native_object(*, data: Any) -> Any:
+    return jsonable_encoder(data)
+
+
+def map_to_raid_info(*, data: Any, seed_type: SeedType) -> RaidInfo:
+    data_type = RaidInfoRaw if seed_type == SeedType.RAW else RaidInfoEnhanced
+
+    return data_type(**data)
+
+
+def map_to_raid_seed(*, data: Any, seed_type: SeedType) -> RaidSeed:
+    return list(
+        map(lambda item: map_to_raid_info(data=item, seed_type=seed_type),
+            data))
