@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
-from typing import Any, Iterator, List, Optional, Tuple, Union
+from typing import Any, Iterator, Optional, Tuple, Union
 
 from fastapi.encoders import jsonable_encoder
 from src.domain.seed_data_repository import SeedDataRepository
-from src.model.raid_data import RaidSeedData
+from src.model.raid_data import RaidSeed
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -13,7 +13,7 @@ def _filepath_generator(*, dir_path: Path) -> Iterator[Path]:
     yield from filter(Path.is_file, dir_path.iterdir())
 
 
-def _load_from_json_file(*, filepath: Path) -> List[RaidSeedData]:
+def _load_from_json_file(*, filepath: Path) -> RaidSeed:
     with open(filepath, mode='r', encoding='utf-8') as file:
         return json.load(file)
 
@@ -67,11 +67,11 @@ class FSSeedDataRepository(SeedDataRepository):
         except IndexError:
             return None
 
-    def get_seed_by_identifier(self,
-                               *,
-                               identifier: str,
-                               seed_type: SeedType = SeedType.RAW
-                               ) -> Optional[List[RaidSeedData]]:
+    def get_seed_by_identifier(
+            self,
+            *,
+            identifier: str,
+            seed_type: SeedType = SeedType.RAW) -> Optional[RaidSeed]:
 
         filepath = self.base_path / seed_type.value / f"{identifier}.json"
 
@@ -85,7 +85,7 @@ class FSSeedDataRepository(SeedDataRepository):
         *,
         seed_type: SeedType = SeedType.RAW,
         offset_weeks: int = 0,
-    ) -> Optional[List[RaidSeedData]]:
+    ) -> Optional[RaidSeed]:
 
         identifier = self.get_seed_identifier_by_week_offset(
             offset_weeks=offset_weeks)
@@ -94,11 +94,10 @@ class FSSeedDataRepository(SeedDataRepository):
                                            seed_type=seed_type)
 
     def list_seeds(
-        self,
-        *,
-        seed_type: SeedType = SeedType.RAW,
-        sort_order: SortOrder = SortOrder.ASCENDING
-    ) -> Tuple[List[RaidSeedData]]:
+            self,
+            *,
+            seed_type: SeedType = SeedType.RAW,
+            sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[RaidSeed]:
 
         identifiers = self.list_seed_identifiers(sort_order=sort_order)
 
@@ -114,7 +113,7 @@ class FSSeedDataRepository(SeedDataRepository):
                   *,
                   identifier: str,
                   seed_type: SeedType = SeedType.RAW,
-                  data: List[RaidSeedData]) -> bool:
+                  data: RaidSeed) -> bool:
 
         filepath = self.base_path / seed_type.value / f"{identifier}.json"
 
@@ -123,11 +122,10 @@ class FSSeedDataRepository(SeedDataRepository):
 
         return _save_to_json_file(filepath=filepath, data=data)
 
-    def save_seeds(
-            self, *, items: Tuple[Tuple[str, SeedType,
-                                        List[RaidSeedData]]]) -> bool:
+    def save_seeds(self, *, items: Tuple[Tuple[str, SeedType,
+                                               RaidSeed]]) -> bool:
 
-        def save_item(item: Tuple[str, SeedType, List[RaidSeedData]]) -> bool:
+        def save_item(item: Tuple[str, SeedType, RaidSeed]) -> bool:
 
             identifier, seed_type, data = item
 

@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import pytest
 import requests
-from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.model.raid_data import RaidInfoEnhanced, RaidInfoRaw, RaidSeedRaw
 from src.model.seed_type import SeedType
 from src.stage import Stage
 from src.utils import selectors
@@ -27,8 +27,7 @@ def test_validate_stage(stage: Stage):
 
 
 def admin_get_all_filenames_base(stage: Stage,
-                                 posted_seeds: List[Tuple[str,
-                                                          RaidSeedDataRaw]],
+                                 posted_seeds: List[Tuple[str, RaidInfoRaw]],
                                  seed_type: SeedType,
                                  sort_order: SortOrder = None):
     query = "" if sort_order is None else f"sort_order={sort_order.value}"
@@ -56,8 +55,7 @@ def admin_get_all_filenames_base(stage: Stage,
 
 
 def test_admin_get_all_filenames(stage: Stage,
-                                 posted_seeds: List[Tuple[str,
-                                                          RaidSeedDataRaw]]):
+                                 posted_seeds: List[Tuple[str, RaidInfoRaw]]):
     for seed_type in SeedType:
         for sort_order in (None, *SortOrder):
             admin_get_all_filenames_base(stage, posted_seeds, seed_type,
@@ -66,7 +64,7 @@ def test_admin_get_all_filenames(stage: Stage,
 
 def test_admin_download_file(
     stage: Stage,
-    posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
+    posted_seeds: List[Tuple[str, RaidInfoRaw]],
 ):
     for filename, posted_seed in posted_seeds:
         response = make_request_sync(
@@ -87,7 +85,7 @@ def test_admin_download_file(
 
 def test_seeds_all_raw_contains_posted_seeds(
     stage: Stage,
-    posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
+    posted_seeds: List[Tuple[str, RaidInfoRaw]],
 ):
     response = make_request_sync(
         method=requests.get,
@@ -105,8 +103,8 @@ def test_seeds_all_raw_contains_posted_seeds(
         assert_deep_equals(posted_seed, server_seed)
 
 
-def test_seeds_recent_raw_contains_posted_seed(
-        stage: Stage, posted_seeds: List[RaidSeedDataRaw]):
+def test_seeds_recent_raw_contains_posted_seed(stage: Stage,
+                                               posted_seeds: RaidSeedRaw):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/seed_identifiers/{SeedType.RAW.value}",
@@ -130,8 +128,7 @@ def test_seeds_recent_raw_contains_posted_seed(
         assert_deep_equals(posted_seed, server_seed)
 
 
-def test_seeds_all_were_enhanced(stage: Stage,
-                                 posted_seeds: List[RaidSeedDataRaw]):
+def test_seeds_all_were_enhanced(stage: Stage, posted_seeds: RaidSeedRaw):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/seed_identifiers/{SeedType.ENHANCED.value}",
@@ -155,7 +152,7 @@ def test_seeds_all_were_enhanced(stage: Stage,
 
         try:
             for raid_info in server_seed:
-                RaidSeedDataEnhanced(**raid_info)
+                RaidInfoEnhanced(**raid_info)
         except TypeError as exc:
             raise AssertionError from exc
 
@@ -164,8 +161,7 @@ def test_seeds_all_were_enhanced(stage: Stage,
 
 
 @pytest.mark.asyncio
-async def test_raid_info_exists(stage: Stage,
-                                posted_seeds: List[RaidSeedDataRaw]):
+async def test_raid_info_exists(stage: Stage, posted_seeds: RaidSeedRaw):
     all_filenames = make_request_sync(
         method=requests.get,
         path=f"admin/seed_identifiers/{SeedType.RAW.value}",
@@ -197,7 +193,7 @@ async def test_raid_info_exists(stage: Stage,
 
 def test_admin_delete_file(
     stage: Stage,
-    posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
+    posted_seeds: List[Tuple[str, RaidInfoRaw]],
 ):
     for filename, _ in posted_seeds:
         response = make_request_sync(
@@ -211,7 +207,7 @@ def test_admin_delete_file(
 
 def test_admin_filenames_deleted(
     stage: Stage,
-    posted_seeds: List[Tuple[str, RaidSeedDataRaw]],
+    posted_seeds: List[Tuple[str, RaidInfoRaw]],
 ):
     response = make_request_sync(
         method=requests.get,

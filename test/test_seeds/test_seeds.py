@@ -5,7 +5,7 @@ from typing import Type, Union
 
 import pytest
 import requests
-from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.model.raid_data import RaidInfoEnhanced, RaidInfoRaw
 from src.model.seed_type import SeedType
 from src.stage import Stage
 from src.utils.sort_order import SortOrder
@@ -14,8 +14,8 @@ BASE_PATH = "seeds"
 
 
 def seeds_all_valid_model_base(stage: Stage, seed_type: SeedType,
-                               data_type: Type[Union[RaidSeedDataRaw,
-                                                     RaidSeedDataEnhanced]]):
+                               data_type: Type[Union[RaidInfoRaw,
+                                                     RaidInfoEnhanced]]):
     response = make_request_sync(method=requests.get,
                                  path=f"{BASE_PATH}/{seed_type.value}",
                                  stage=stage,
@@ -31,11 +31,11 @@ def seeds_all_valid_model_base(stage: Stage, seed_type: SeedType,
 
 
 def test_seeds_all_raw_valid_model(stage: Stage):
-    seeds_all_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
+    seeds_all_valid_model_base(stage, SeedType.RAW, RaidInfoRaw)
 
 
 def test_seeds_all_enhanced_valid_model(stage: Stage):
-    seeds_all_valid_model_base(stage, SeedType.ENHANCED, RaidSeedDataEnhanced)
+    seeds_all_valid_model_base(stage, SeedType.ENHANCED, RaidInfoEnhanced)
 
 
 def seeds_all_sort_order_base(stage: Stage,
@@ -89,9 +89,9 @@ def test_seeds_all_enhanced_descending(stage: Stage):
     seeds_all_sort_order_base(stage, SeedType.ENHANCED, SortOrder.DESCENDING)
 
 
-def seeds_recent_valid_model_base(
-        stage: Stage, seed_type: SeedType,
-        data_type: Type[Union[RaidSeedDataRaw, RaidSeedDataEnhanced]]):
+def seeds_recent_valid_model_base(stage: Stage, seed_type: SeedType,
+                                  data_type: Type[Union[RaidInfoRaw,
+                                                        RaidInfoEnhanced]]):
     response = make_request_sync(method=requests.get,
                                  path=f"{BASE_PATH}/{seed_type.value}/recent",
                                  stage=stage,
@@ -106,12 +106,11 @@ def seeds_recent_valid_model_base(
 
 
 def test_seeds_recent_raw_valid_model(stage: Stage):
-    seeds_recent_valid_model_base(stage, SeedType.RAW, RaidSeedDataRaw)
+    seeds_recent_valid_model_base(stage, SeedType.RAW, RaidInfoRaw)
 
 
 def test_seeds_recent_enhanced_valid_model(stage: Stage):
-    seeds_recent_valid_model_base(stage, SeedType.ENHANCED,
-                                  RaidSeedDataEnhanced)
+    seeds_recent_valid_model_base(stage, SeedType.ENHANCED, RaidInfoEnhanced)
 
 
 @pytest.mark.asyncio

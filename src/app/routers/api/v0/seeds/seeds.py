@@ -1,9 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import RedirectResponse
 from src.domain.seed_data_repository import SeedDataRepository
-from src.model.raid_data import RaidSeedData
+from src.model.raid_data import RaidSeed
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -11,9 +11,8 @@ from src.utils.sort_order import SortOrder
 def _factory_get_all_seeds(*, repo: SeedDataRepository):
 
     async def get_all_seeds_sorted(
-        seed_type: SeedType,
-        sort_order: SortOrder = SortOrder.ASCENDING
-    ) -> Tuple[List[RaidSeedData]]:
+            seed_type: SeedType,
+            sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[RaidSeed]:
 
         return repo.list_seeds(seed_type=seed_type, sort_order=sort_order)
 
@@ -22,11 +21,10 @@ def _factory_get_all_seeds(*, repo: SeedDataRepository):
 
 def _factory_get_seed_by_recency(*, repo: SeedDataRepository):
 
-    async def get_seed_by_recency(
-            seed_type: SeedType,
-            offset_weeks: int = 0,
-            *,
-            download: bool = False) -> List[RaidSeedData]:
+    async def get_seed_by_recency(seed_type: SeedType,
+                                  offset_weeks: int = 0,
+                                  *,
+                                  download: bool = False) -> RaidSeed:
 
         if download:
             identifier = repo.get_seed_identifier_by_week_offset(

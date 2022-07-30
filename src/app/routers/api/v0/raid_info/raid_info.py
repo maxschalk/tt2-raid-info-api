@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from src.domain.seed_data_repository import SeedDataRepository
-from src.model.raid_data import RaidSeedData
+from src.model.raid_data import RaidInfo
 from src.model.seed_type import SeedType
 from src.utils import selectors
 
@@ -10,7 +10,7 @@ def _factory_raid_info_by_tier_level(*, repo: SeedDataRepository):
     async def raid_info_by_tier_level(seed_type: SeedType,
                                       tier: int,
                                       level: int,
-                                      offset_weeks: int = 0) -> RaidSeedData:
+                                      offset_weeks: int = 0) -> RaidInfo:
 
         seed_data = repo.get_seed_by_week_offset(offset_weeks=offset_weeks,
                                                  seed_type=seed_type)

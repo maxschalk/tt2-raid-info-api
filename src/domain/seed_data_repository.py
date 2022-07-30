@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from ast import Tuple
 from typing import List, Optional
 
-from src.model.raid_data import RaidSeedData
+from src.model.raid_data import RaidSeed
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -36,11 +36,11 @@ class SeedDataRepository(ABC):
         pass
 
     @abstractmethod
-    def get_seed_by_identifier(self,
-                               *,
-                               identifier: str,
-                               seed_type: SeedType = SeedType.RAW
-                               ) -> Optional[List[RaidSeedData]]:
+    def get_seed_by_identifier(
+            self,
+            *,
+            identifier: str,
+            seed_type: SeedType = SeedType.RAW) -> Optional[RaidSeed]:
         pass
 
     @abstractmethod
@@ -49,27 +49,25 @@ class SeedDataRepository(ABC):
         *,
         seed_type: SeedType = SeedType.RAW,
         offset_weeks: int = 0,
-    ) -> Optional[List[RaidSeedData]]:
+    ) -> Optional[RaidSeed]:
         pass
 
     @abstractmethod
     def list_seeds(
-        self,
-        *,
-        seed_type: SeedType = SeedType.RAW,
-        sort_order: SortOrder = SortOrder.ASCENDING
-    ) -> List[List[RaidSeedData]]:
+            self,
+            *,
+            seed_type: SeedType = SeedType.RAW,
+            sort_order: SortOrder = SortOrder.ASCENDING) -> List[RaidSeed]:
         pass
 
     @abstractmethod
     def save_seed(self, *, identifier: str, seed_type: SeedType,
-                  data: List[RaidSeedData]) -> None:
+                  data: RaidSeed) -> None:
         pass
 
     @abstractmethod
-    def save_seeds(
-            self, *, items: Tuple[Tuple[str, SeedType,
-                                        List[RaidSeedData]]]) -> None:
+    def save_seeds(self, *, items: Tuple[Tuple[str, SeedType,
+                                               RaidSeed]]) -> None:
         pass
 
     @abstractmethod

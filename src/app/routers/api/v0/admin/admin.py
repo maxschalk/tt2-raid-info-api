@@ -1,11 +1,11 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import StreamingResponse
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import RaidSeedDataEnhanced, RaidSeedDataRaw
+from src.model.raid_data import RaidSeedEnhanced, RaidSeedRaw
 from src.model.seed_type import SeedType
 from src.scripts.enhance_seeds import enhance_seed_data
 from src.utils.get_env import get_env
@@ -62,8 +62,8 @@ def _factory_enhance_seed():
     async def enhance_seed(
         *,
         download: bool = False,
-        data: List[RaidSeedDataRaw],
-    ) -> Union[StreamingResponse, List[RaidSeedDataEnhanced]]:
+        data: RaidSeedRaw,
+    ) -> Union[StreamingResponse, RaidSeedEnhanced]:
 
         enhanced_seed_data = enhance_seed_data(data=data)
 
@@ -81,7 +81,7 @@ def _factory_save_seed(*, repo: SeedDataRepository):
     async def save_seed(
         identifier: str,
         *,
-        data: List[RaidSeedDataRaw],
+        data: RaidSeedRaw,
         secret: Optional[str] = Header(None)) -> Dict:
 
         _verify_authorization(secret=secret)

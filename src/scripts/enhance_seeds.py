@@ -2,27 +2,26 @@ from typing import List
 
 from fastapi.encoders import jsonable_encoder
 from src.model.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
-                                 EnhancedTitanPart, RaidSeedDataEnhanced,
-                                 RaidSeedDataRaw, Titan, TitanPart)
+                                 EnhancedTitanPart, RaidInfoEnhanced,
+                                 RaidInfoRaw, Titan, TitanPart)
 from src.model.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                      TITAN_PARTS_ATOMIC)
 from src.utils import selectors
 from src.utils.format_hp import format_healthpoints
 
 
-def enhance_seed_data(
-        *, data: List[RaidSeedDataRaw]) -> List[RaidSeedDataEnhanced]:
+def enhance_seed_data(*, data: RaidSeedRaw) -> RaidSeedEnhanced:
 
     jsonable = map(jsonable_encoder, data)
 
     enhanced = map(_enhance_raid_info, jsonable)
 
-    objects = map(lambda elem: RaidSeedDataEnhanced(**elem), enhanced)
+    objects = map(lambda elem: RaidInfoEnhanced(**elem), enhanced)
 
     return list(objects)
 
 
-def _enhance_raid_info(raid_info: RaidSeedDataRaw) -> RaidSeedDataEnhanced:
+def _enhance_raid_info(raid_info: RaidInfoRaw) -> RaidInfoEnhanced:
     raid_total_target_hp = selectors.raid_target_hp(raid_info)
     raid_info['raid_total_target_hp'] = raid_total_target_hp
     raid_info['raid_total_target_hp_formatted'] = format_healthpoints(

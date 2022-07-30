@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 import pymongo
 from pymongo import MongoClient
@@ -6,7 +6,7 @@ from pymongo.collection import Collection
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import RaidSeedData
+from src.model.raid_data import RaidSeed
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -84,11 +84,11 @@ class MongoSeedDataRepository(SeedDataRepository):
         except IndexError:
             return None
 
-    def get_seed_by_identifier(self,
-                               *,
-                               identifier: str,
-                               seed_type: SeedType = SeedType.RAW
-                               ) -> Optional[List[RaidSeedData]]:
+    def get_seed_by_identifier(
+            self,
+            *,
+            identifier: str,
+            seed_type: SeedType = SeedType.RAW) -> Optional[RaidSeed]:
 
         record = self._collection.find_one({
             "identifier": identifier,
@@ -105,7 +105,7 @@ class MongoSeedDataRepository(SeedDataRepository):
         *,
         seed_type: SeedType = SeedType.RAW,
         offset_weeks: int = 0,
-    ) -> Optional[List[RaidSeedData]]:
+    ) -> Optional[RaidSeed]:
 
         seed_id = self.get_seed_identifier_by_week_offset(
             seed_type=seed_type, offset_weeks=offset_weeks)
@@ -117,11 +117,10 @@ class MongoSeedDataRepository(SeedDataRepository):
                                            seed_type=seed_type)
 
     def list_seeds(
-        self,
-        *,
-        seed_type: SeedType = SeedType.RAW,
-        sort_order: SortOrder = SortOrder.ASCENDING
-    ) -> Tuple[List[RaidSeedData]]:
+            self,
+            *,
+            seed_type: SeedType = SeedType.RAW,
+            sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[RaidSeed]:
 
         db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
 
@@ -136,7 +135,7 @@ class MongoSeedDataRepository(SeedDataRepository):
                    collection: Collection,
                    identifier: str,
                    seed_type: SeedType,
-                   data: List[RaidSeedData],
+                   data: RaidSeed,
                    session=None) -> None:
 
         if collection.count_documents(
@@ -157,16 +156,15 @@ class MongoSeedDataRepository(SeedDataRepository):
             session=session)
 
     def save_seed(self, *, identifier: str, seed_type: SeedType,
-                  data: List[RaidSeedData]) -> None:
+                  data: RaidSeed) -> None:
 
         self._save_seed(collection=self._collection,
                         identifier=identifier,
                         seed_type=seed_type,
                         data=data)
 
-    def save_seeds(
-            self, *, items: Tuple[Tuple[str, SeedType,
-                                        List[RaidSeedData]]]) -> None:
+    def save_seeds(self, *, items: Tuple[Tuple[str, SeedType,
+                                               RaidSeed]]) -> None:
 
         def callback(session) -> None:
             collection = session.client[self._database_name][

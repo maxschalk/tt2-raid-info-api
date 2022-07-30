@@ -7,13 +7,13 @@ import pytest
 import requests
 # pylint: disable=no-name-in-module
 from pydantic import BaseModel
-from src.model.raid_data import RaidSeedDataRaw
+from src.model.raid_data import RaidInfoRaw
 from src.stage import Stage
 from src.utils import selectors
 
 
 @pytest.fixture(scope="module", autouse=True)
-def posted_seeds(stage: Stage) -> List[Tuple[str, RaidSeedDataRaw]]:
+def posted_seeds(stage: Stage) -> List[Tuple[str, RaidInfoRaw]]:
     mocked_seeds = [[mock_raid_raw_seed_data() for _ in range(140)]
                     for _ in range(2)]
 
