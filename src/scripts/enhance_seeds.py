@@ -3,7 +3,9 @@ from typing import List
 from fastapi.encoders import jsonable_encoder
 from src.model.raid_data import (ConsolidatedTitanPart, EnhancedTitan,
                                  EnhancedTitanPart, RaidInfoEnhanced,
-                                 RaidInfoRaw, Titan, TitanPart)
+                                 RaidInfoRaw, RaidSeedEnhanced, RaidSeedRaw,
+                                 Titan, TitanPart, map_to_raid_seed)
+from src.model.seed_type import SeedType
 from src.model.titan_anatomy import (ARMOR_PREFIX, BODY_PREFIX,
                                      TITAN_PARTS_ATOMIC)
 from src.utils import selectors
@@ -16,9 +18,7 @@ def enhance_seed_data(*, data: RaidSeedRaw) -> RaidSeedEnhanced:
 
     enhanced = map(_enhance_raid_info, jsonable)
 
-    objects = map(lambda elem: RaidInfoEnhanced(**elem), enhanced)
-
-    return list(objects)
+    return map_to_raid_seed(data=list(enhanced), seed_type=SeedType.ENHANCED)
 
 
 def _enhance_raid_info(raid_info: RaidInfoRaw) -> RaidInfoEnhanced:
