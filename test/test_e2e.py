@@ -1,6 +1,9 @@
 import asyncio
+import contextlib
 import json
 import operator
+import threading
+import time
 from contextlib import suppress
 from http.client import HTTPException
 from test.mocks import mock_raid_seed_raw
@@ -10,6 +13,7 @@ from typing import List, Tuple
 import aiohttp
 import pytest
 import requests
+import uvicorn
 from src.model.raid_data import (RaidInfoRaw, RaidSeedRaw,
                                  map_to_native_object, map_to_raid_info,
                                  map_to_raid_seed)
@@ -22,9 +26,11 @@ from src.utils.sort_order import SortOrder
 
 # UTILS
 
+PORT = 5000
+
 ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
 
-BASE_URL = "http://localhost:5000/api/v0"
+BASE_URL = f"http://localhost:{PORT}/api/v0"
 
 HEADERS = {'secret': ENV_AUTH_SECRET}
 
@@ -66,6 +72,21 @@ async def make_requests_async(paths):
                 method=session.get, path=p, response_json=True), paths))
 
 
+class Server(uvicorn.Server):
+
+    @contextlib.contextmanager
+    def run_in_thread(self):
+        thread = threading.Thread(target=self.run)
+        thread.start()
+        try:
+            while not self.started:
+                time.sleep(1e-3)
+            yield
+        finally:
+            self.should_exit = True
+            thread.join()
+
+
 # SETUP
 
 BASE_PATH_ADMIN = "admin"
@@ -73,9 +94,18 @@ BASE_PATH_SEEDS = "seeds"
 BASE_PATH_RAID_INFO = "raid_info"
 
 
+@pytest.fixture(scope="module", autouse=True)
+def server():
+    config = uvicorn.Config("src.app.main:app", host="0.0.0.0", port=PORT)
+    server = Server(config=config)
+
+    with server.run_in_thread():
+        yield
+
+
 @pytest.fixture(scope="module")
 def posted_seeds() -> List[Tuple[str, RaidSeedRaw]]:
-    mocked_seeds = [mock_raid_seed_raw(length=140) for _ in range(2)]
+    mocked_seeds = [mock_raid_seed_raw(length=3) for _ in range(3)]
 
     def identifier_from_seed(seed):
         valid_from = selectors.raid_valid_from(
