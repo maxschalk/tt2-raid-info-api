@@ -1,3 +1,4 @@
+import contextlib
 from typing import Literal, Optional, Tuple, Union
 
 import pymongo
@@ -29,7 +30,7 @@ class MongoSeedDataRepository(SeedDataRepository):
                                    "@{url}?retryWrites=true&w=majority")
 
     def __init__(self, *, url: str, username: str, password: str, db_name: str,
-                 collection_name: str) -> None:
+                 coll_name: str) -> None:
         super().__init__()
 
         self._connection_string = self._connection_string_template.format(
@@ -40,8 +41,8 @@ class MongoSeedDataRepository(SeedDataRepository):
         self._database_name = db_name
         self._database = self._client[db_name]
 
-        self._collection_name = collection_name
-        self._collection = self._database[collection_name]
+        self._collection_name = coll_name
+        self._collection = self._database[coll_name]
 
     def _connect(self) -> MongoClient:
         return MongoClient(self._connection_string)
@@ -49,9 +50,12 @@ class MongoSeedDataRepository(SeedDataRepository):
     def _disconnect(self) -> None:
         if self._client:
             self._client.close()
+            self._client = None
 
     def _teardown_db(self) -> None:
         self._client.drop_database(self._database)
+
+        self._disconnect()
 
     def list_seed_identifiers(
             self,
@@ -222,3 +226,15 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         with self._client.start_session() as session:
             session.with_transaction(callback=callback)
+
+
+@contextlib.contextmanager
+def temp_repo(**kwargs) -> MongoSeedDataRepository:
+    # pylint: disable=protected-access
+
+    repo = MongoSeedDataRepository(**kwargs)
+
+    try:
+        yield repo
+    finally:
+        repo._teardown_db()
