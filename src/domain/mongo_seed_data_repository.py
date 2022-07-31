@@ -7,7 +7,8 @@ from pymongo.collection import Collection
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import RaidSeed, map_to_raid_seed
+from src.model.raid_data import (RaidSeed, is_of_seed_type,
+                                 map_to_native_object, map_to_raid_seed)
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
 
@@ -60,51 +61,78 @@ class MongoSeedDataRepository(SeedDataRepository):
     def list_seed_identifiers(
             self,
             *,
-            seed_type: SeedType = SeedType.RAW,
+            seed_type: Optional[SeedType] = None,
             sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[str]:
 
         db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
 
-        records = self._collection.find({
-            "seed_type": seed_type.value
-        }).sort("identifier", db_sort_order)
+        query = {} if seed_type is None else {"seed_type": seed_type.value}
+
+        records = self._collection.find(query).sort("identifier",
+                                                    db_sort_order)
 
         return tuple(map(lambda r: r['identifier'], records))
 
     def get_seed_identifier_by_week_offset(
             self,
             *,
-            seed_type: SeedType = SeedType.RAW,
+            seed_type: Optional[SeedType] = None,
             offset_weeks: int = 0) -> Optional[str]:
 
         offset_weeks = abs(offset_weeks)
 
-        records = self._collection.find({
-            "seed_type": seed_type.value
-        }).sort("identifier", pymongo.DESCENDING)
+        query = {} if seed_type is None else {"seed_type": seed_type.value}
+
+        records = self._collection.find(query).sort("identifier",
+                                                    pymongo.DESCENDING)
 
         try:
             return records[offset_weeks]["identifier"]
         except IndexError:
             return None
 
+    def list_seeds(
+            self,
+            *,
+            seed_type: Optional[SeedType] = None,
+            sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[RaidSeed]:
+
+        db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
+
+        query = {} if seed_type is None else {"seed_type": seed_type.value}
+
+        records = self._collection.find(query).sort("identifier",
+                                                    db_sort_order)
+
+        return tuple(
+            map(
+                lambda r: map_to_raid_seed(data=r["data"], seed_type=seed_type
+                                           ), records))
+
     def get_seed_by_identifier(
             self,
             *,
             identifier: str,
-            seed_type: SeedType = SeedType.RAW) -> Optional[RaidSeed]:
+            seed_type: Optional[SeedType] = None) -> Optional[RaidSeed]:
 
-        record = self._collection.find_one({
+        query = {
             "identifier": identifier,
-            "seed_type": seed_type.value
-        })
+        }
+
+        if seed_type is not None:
+            query["seed_type"] = seed_type.value
+
+        record = self._collection.find_one(query)
+
+        if record is None:
+            return None
 
         return map_to_raid_seed(data=record["data"], seed_type=seed_type)
 
     def get_seed_by_week_offset(
         self,
         *,
-        seed_type: SeedType = SeedType.RAW,
+        seed_type: Optional[SeedType] = None,
         offset_weeks: int = 0,
     ) -> Optional[RaidSeed]:
 
@@ -117,30 +145,17 @@ class MongoSeedDataRepository(SeedDataRepository):
         return self.get_seed_by_identifier(identifier=seed_id,
                                            seed_type=seed_type)
 
-    def list_seeds(
-            self,
-            *,
-            seed_type: SeedType = SeedType.RAW,
-            sort_order: SortOrder = SortOrder.ASCENDING) -> Tuple[RaidSeed]:
-
-        db_sort_order = _map_pymongo_sort_order(sort_order=sort_order)
-
-        records = self._collection.find({
-            "seed_type": seed_type.value
-        }).sort("identifier", db_sort_order)
-
-        return tuple(
-            map(
-                lambda r: map_to_raid_seed(data=r["data"], seed_type=seed_type
-                                           ), records))
-
     def _save_seed(self,
                    *,
                    collection: Collection,
                    identifier: str,
                    seed_type: SeedType,
                    data: RaidSeed,
-                   session=None) -> None:
+                   session=None,
+                   _duplicate_ok: bool = False) -> None:
+
+        if not is_of_seed_type(data=data, seed_type=seed_type):
+            raise ValueError(f"Not a valid {seed_type.value} raid seed")
 
         if collection.count_documents(
             {
@@ -148,40 +163,50 @@ class MongoSeedDataRepository(SeedDataRepository):
                 "seed_type": seed_type.value
             },
                 session=session) > 0:
-            raise SeedDuplicateError(
-                f"Seed {identifier}.{seed_type.value} already exists")
+
+            if not _duplicate_ok:
+                raise SeedDuplicateError(
+                    f"Seed {identifier}.{seed_type.value} already exists")
+
+            return
 
         collection.insert_one(
             {
                 "identifier": identifier,
                 "seed_type": seed_type.value,
-                "data": list(map(lambda elem: elem.dict(), data))
+                "data": map_to_native_object(data=data)
             },
             session=session)
 
-    def save_seed(self, *, identifier: str, seed_type: SeedType,
-                  data: RaidSeed) -> None:
+    def save_seed(self,
+                  *,
+                  identifier: str,
+                  seed_type: SeedType,
+                  data: RaidSeed,
+                  _duplicate_ok: bool = False) -> None:
 
         self._save_seed(collection=self._collection,
                         identifier=identifier,
                         seed_type=seed_type,
-                        data=data)
+                        data=data,
+                        _duplicate_ok=_duplicate_ok)
 
-    def save_seeds(self, *, items: Tuple[Tuple[str, SeedType,
-                                               RaidSeed]]) -> None:
+    def save_seeds(self,
+                   *,
+                   items: Tuple[Tuple[str, SeedType, RaidSeed]],
+                   _duplicate_ok: bool = False) -> None:
 
         def callback(session) -> None:
             collection = session.client[self._database_name][
                 self._collection_name]
 
-            for item in items:
-                identifier, seed_type, data = item
-
+            for (identifier, seed_type, data) in items:
                 self._save_seed(collection=collection,
                                 identifier=identifier,
                                 seed_type=seed_type,
                                 data=data,
-                                session=session)
+                                session=session,
+                                _duplicate_ok=_duplicate_ok)
 
         with self._client.start_session() as session:
             session.with_transaction(callback=callback)
@@ -191,7 +216,8 @@ class MongoSeedDataRepository(SeedDataRepository):
                      collection: Collection,
                      identifier: str,
                      seed_type: SeedType,
-                     session=None) -> None:
+                     session=None,
+                     _notfound_ok: bool = False) -> None:
 
         record = collection.find_one_and_delete(
             {
@@ -200,29 +226,36 @@ class MongoSeedDataRepository(SeedDataRepository):
             },
             session=session)
 
-        if record is None:
+        if not _notfound_ok and record is None:
             raise SeedNotFoundError(
                 f"Seed {identifier}.{seed_type.value} not found")
 
-    def delete_seed(self, *, identifier: str, seed_type: SeedType) -> None:
+    def delete_seed(self,
+                    *,
+                    identifier: str,
+                    seed_type: SeedType,
+                    _notfound_ok: bool = False) -> None:
 
         self._delete_seed(collection=self._collection,
                           identifier=identifier,
-                          seed_type=seed_type)
+                          seed_type=seed_type,
+                          _notfound_ok=_notfound_ok)
 
-    def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> None:
+    def delete_seeds(self,
+                     *,
+                     items: Tuple[Tuple[str, SeedType]],
+                     _notfound_ok: bool = False) -> None:
 
         def callback(session) -> None:
             collection = session.client[self._database_name][
                 self._collection_name]
 
-            for item in items:
-                identifier, seed_type = item
-
+            for (identifier, seed_type) in items:
                 self._delete_seed(collection=collection,
                                   identifier=identifier,
                                   seed_type=seed_type,
-                                  session=session)
+                                  session=session,
+                                  _notfound_ok=_notfound_ok)
 
         with self._client.start_session() as session:
             session.with_transaction(callback=callback)
@@ -230,9 +263,10 @@ class MongoSeedDataRepository(SeedDataRepository):
 
 @contextlib.contextmanager
 def temp_repo(**kwargs) -> MongoSeedDataRepository:
-    # pylint: disable=protected-access
 
     repo = MongoSeedDataRepository(**kwargs)
+
+    # pylint: disable=protected-access
 
     try:
         yield repo
