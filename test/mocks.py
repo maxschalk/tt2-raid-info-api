@@ -89,76 +89,58 @@ def mock_enhanced_titan() -> EnhancedTitan:
         number_of_cursed_parts=fake.pyint())
 
 
-def _generate_mock_seed_identifier() -> Iterator[str]:
-    valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
+def _generate_dates_descending() -> Iterator[datetime.datetime]:
+    date = datetime.datetime(1970, 1, 1, 0, 0, 1)
 
     while True:
-        valid_from = valid_from + datetime.timedelta(days=-7)
+        date = date + datetime.timedelta(days=-7)
+        yield date
 
-        yield f"raid_seed_{valid_from.strftime('%Y%m%d')}"
 
-
-GENERATOR_MOCK_SEED_IDENTIFIER = _generate_mock_seed_identifier()
+GENERATOR_DATE = _generate_dates_descending()
 
 
 def mock_seed_identifier() -> str:
-    return next(GENERATOR_MOCK_SEED_IDENTIFIER)
+    valid_from = next(GENERATOR_DATE)
 
-
-def _generate_mock_raid_info_raw() -> Iterator[RaidInfoRaw]:
-    valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
-
-    while True:
-        valid_from = valid_from + datetime.timedelta(days=-7)
-
-        expire_at = valid_from + datetime.timedelta(days=7, seconds=-1)
-
-        titans = [mock_titan() for _ in range(randint(3, 10))]
-
-        yield RaidInfoRaw(
-            spawn_sequence=[
-                choice(titans).enemy_name for _ in range(randint(3, 10))
-            ],
-            raid_info_valid_from=valid_from.isoformat(),
-            raid_info_expire_at=expire_at.isoformat(),
-            tier=str(fake.unique.pyint()),
-            level=str(fake.unique.pyint()),
-            titans=titans,
-            area_buffs=[mock_buff() for _ in range(randint(3, 10))])
-
-
-GENERATOR_MOCK_RAID_INFO_RAW = _generate_mock_raid_info_raw()
+    return f"raid_seed_{valid_from.strftime('%Y%m%d')}"
 
 
 def mock_raid_info_raw() -> RaidInfoRaw:
-    return next(GENERATOR_MOCK_RAID_INFO_RAW)
 
+    valid_from = next(GENERATOR_DATE)
 
-def _generate_mock_raid_info_enhanced() -> Iterator[RaidInfoEnhanced]:
-    valid_from = datetime.datetime(1970, 1, 1, 0, 0, 1)
+    expire_at = valid_from + datetime.timedelta(days=7, seconds=-1)
 
-    while True:
-        valid_from = valid_from + datetime.timedelta(days=-7)
+    titans = [mock_titan() for _ in range(randint(3, 10))]
 
-        expire_at = valid_from + datetime.timedelta(days=7, seconds=-1)
-
-        yield RaidInfoEnhanced(
-            spawn_sequence=[fake.pystr() for _ in range(randint(3, 10))],
-            raid_info_valid_from=valid_from.isoformat(),
-            raid_info_expire_at=expire_at.isoformat(),
-            tier=str(fake.unique.pyint()),
-            level=str(fake.unique.pyint()),
-            area_buffs=[mock_buff() for _ in range(randint(3, 10))],
-            raid_total_target_hp=choice((fake.pyfloat(), fake.pyint())),
-            raid_total_target_hp_formatted=fake.pystr(),
-            titans=[mock_enhanced_titan() for _ in range(randint(3, 10))])
-
-
-GENERATOR_MOCK_RAID_INFO_ENHANCED = _generate_mock_raid_info_enhanced()
+    return RaidInfoRaw(spawn_sequence=[
+        choice(titans).enemy_name for _ in range(randint(3, 10))
+    ],
+                       raid_info_valid_from=valid_from.isoformat(),
+                       raid_info_expire_at=expire_at.isoformat(),
+                       tier=str(fake.unique.pyint()),
+                       level=str(fake.unique.pyint()),
+                       titans=titans,
+                       area_buffs=[mock_buff() for _ in range(randint(3, 10))])
 
 
 def mock_raid_info_enhanced() -> RaidInfoEnhanced:
-    return next(GENERATOR_MOCK_RAID_INFO_ENHANCED)
+
+    valid_from = next(GENERATOR_DATE)
+
+    expire_at = valid_from + datetime.timedelta(days=7, seconds=-1)
+
+    return RaidInfoEnhanced(
+        spawn_sequence=[fake.pystr() for _ in range(randint(3, 10))],
+        raid_info_valid_from=valid_from.isoformat(),
+        raid_info_expire_at=expire_at.isoformat(),
+        tier=str(fake.unique.pyint()),
+        level=str(fake.unique.pyint()),
+        area_buffs=[mock_buff() for _ in range(randint(3, 10))],
+        raid_total_target_hp=choice((fake.pyfloat(), fake.pyint())),
+        raid_total_target_hp_formatted=fake.pystr(),
+        titans=[mock_enhanced_titan() for _ in range(randint(3, 10))])
 
 
 def mock_raid_seed_raw(length: int = 2) -> RaidSeedRaw:
