@@ -47,12 +47,10 @@ def main(*, stage: Stage = None, port: int = None):
 
     if stage == Stage.PRODUCTION:
         try:
-            import uvicorn.workers
-
             options = {
                 "bind": f"{HOST}:{port}",
                 "workers": 4,
-                "worker_class": uvicorn.workers.UvicornWorker,
+                "worker_class": "uvicorn.workers.UvicornWorker",
             }
             StandaloneGunicornApplication(server, options).run()
 
