@@ -23,7 +23,7 @@ def create_router(seed_data_repo: SeedDataRepository):
     async def welcome():
         return {
             "message":
-            "Welcome to the TT2 Raid Seed API v0! You can find the docs at /docs."
+            "Welcome to the TT2 Raid Seed API v0! You can find the docs at /docs or /redoc."
         }
 
     return router
