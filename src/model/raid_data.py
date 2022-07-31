@@ -2,7 +2,7 @@ from typing import Any, List, Optional, Union
 
 from fastapi.encoders import jsonable_encoder
 # pylint: disable=no-name-in-module
-from pydantic import BaseModel, StrictStr
+from pydantic import BaseModel, StrictStr, ValidationError
 from src.model.seed_type import SeedType
 
 
@@ -101,17 +101,33 @@ RaidSeedEnhanced = List[RaidInfoEnhanced]
 RaidSeed = Union[RaidSeedRaw, RaidInfoEnhanced]
 
 
+def is_of_seed_type(*, data: Any, seed_type: SeedType) -> bool:
+    try:
+        data_type = RaidInfoRaw if seed_type == SeedType.RAW else RaidInfoEnhanced
+
+        return all(type(elem) == data_type for elem in data)
+    except Exception:
+        return False
+
+
 def map_to_native_object(*, data: Any) -> Any:
     return jsonable_encoder(data)
 
 
-def map_to_raid_info(*, data: Any, seed_type: SeedType) -> RaidInfo:
-    data_type = RaidInfoRaw if seed_type == SeedType.RAW else RaidInfoEnhanced
+def map_to_raid_info(*, data: Any, seed_type: Optional[SeedType]) -> RaidInfo:
+    if seed_type is None:
+        try:
+            return RaidInfoEnhanced(**data)
+        except ValidationError:
+            return RaidInfoRaw(**data)
 
-    return data_type(**data)
+    else:
+        data_type = RaidInfoRaw if seed_type == SeedType.RAW else RaidInfoEnhanced
+
+        return data_type(**data)
 
 
-def map_to_raid_seed(*, data: Any, seed_type: SeedType) -> RaidSeed:
+def map_to_raid_seed(*, data: Any, seed_type: Optional[SeedType]) -> RaidSeed:
     return list(
         map(lambda item: map_to_raid_info(data=item, seed_type=seed_type),
             data))
