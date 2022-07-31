@@ -1,12 +1,11 @@
-from typing import Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import StreamingResponse
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
-from src.model.raid_data import (RaidSeedEnhanced, RaidSeedRaw,
-                                 map_to_native_object)
+from src.model.raid_data import RaidSeedEnhanced, RaidSeedRaw
 from src.model.seed_type import SeedType
 from src.scripts.enhance_seeds import enhance_seed_data
 from src.utils.get_env import get_env
@@ -40,7 +39,8 @@ def _factory_list_seed_identifiers(*, repo: SeedDataRepository):
     return list_seed_identifiers
 
 
-def _factory_download_seed_file(*, repo: SeedDataRepository):
+def _factory_download_seed_file(*, repo: SeedDataRepository,
+                                create_stream_response_func: Callable):
 
     async def download_seed_file(seed_type: SeedType,
                                  identifier: str) -> StreamingResponse:
@@ -53,12 +53,14 @@ def _factory_download_seed_file(*, repo: SeedDataRepository):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"{seed_type.value} seed {identifier} does not exist")
 
-        return create_stream_response(data=data, filename=f"{identifier}.json")
+        return create_stream_response_func(data=data,
+                                           filename=f"{identifier}.json")
 
     return download_seed_file
 
 
-def _factory_enhance_seed():
+def _factory_enhance_seed(*, enhance_seed_data_func: Callable,
+                          create_stream_response_func: Callable):
 
     async def enhance_seed(
         *,
@@ -66,19 +68,19 @@ def _factory_enhance_seed():
         data: RaidSeedRaw,
     ) -> Union[StreamingResponse, RaidSeedEnhanced]:
 
-        enhanced_seed_data = enhance_seed_data(data=data)
+        enhanced_seed_data = enhance_seed_data_func(data=data)
 
         if download:
-            return create_stream_response(
-                data=map_to_native_object(data=enhanced_seed_data),
-                filename="enhanced_custom_seed.json")
+            return create_stream_response_func(
+                data=enhanced_seed_data, filename="enhanced_custom_seed.json")
 
         return enhanced_seed_data
 
     return enhance_seed
 
 
-def _factory_save_seed(*, repo: SeedDataRepository):
+def _factory_save_seed(*, repo: SeedDataRepository,
+                       enhance_seed_data_func: Callable):
 
     async def save_seed(
         identifier: str,
@@ -88,7 +90,7 @@ def _factory_save_seed(*, repo: SeedDataRepository):
 
         _verify_authorization(secret=secret)
 
-        enhanced = enhance_seed_data(data=data)
+        enhanced = enhance_seed_data_func(data=data)
 
         payload = (
             (identifier, SeedType.RAW, data),
@@ -102,8 +104,10 @@ def _factory_save_seed(*, repo: SeedDataRepository):
                                 detail=str(err)) from err
 
         return {
-            "detail": f"Saved seed {identifier}.{SeedType.RAW.value}",
-            "identifier": identifier,
+            "detail": (f"Saved seeds {identifier}.{SeedType.RAW.value} "
+                       f"and {identifier}.{SeedType.ENHANCED.value}"),
+            "identifier":
+            identifier,
         }
 
     return save_seed
@@ -128,8 +132,10 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
                                 detail=str(err)) from err
 
         return {
-            "detail": f"Deleted seed {identifier}.{SeedType.RAW.value}",
-            "identifier": identifier,
+            "detail": (f"Deleted seeds {identifier}.{SeedType.RAW.value} "
+                       f"and {identifier}.{SeedType.ENHANCED.value}"),
+            "identifier":
+            identifier,
         }
 
     return delete_seed
@@ -152,18 +158,25 @@ def create_router(seed_data_repo: SeedDataRepository):
     router.add_api_route(
         path="/seed/{seed_type}/{identifier}",
         methods=["get"],
-        endpoint=_factory_download_seed_file(repo=seed_data_repo),
+        endpoint=_factory_download_seed_file(
+            repo=seed_data_repo,
+            create_stream_response_func=create_stream_response),
         include_in_schema=DISPLAY_IN_DOCS)
 
-    router.add_api_route(path="/enhance",
-                         methods=["post"],
-                         endpoint=_factory_enhance_seed(),
-                         include_in_schema=DISPLAY_IN_DOCS)
+    router.add_api_route(
+        path="/enhance",
+        methods=["post"],
+        endpoint=_factory_enhance_seed(
+            enhance_seed_data_func=enhance_seed_data,
+            create_stream_response_func=create_stream_response),
+        include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(path="/save/{identifier}",
                          methods=["post"],
                          status_code=status.HTTP_201_CREATED,
-                         endpoint=_factory_save_seed(repo=seed_data_repo),
+                         endpoint=_factory_save_seed(
+                             repo=seed_data_repo,
+                             enhance_seed_data_func=enhance_seed_data),
                          include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(path="/delete/{identifier}",
