@@ -34,11 +34,14 @@ if __name__ == "__main__" and "linux" in sys.platform:
 
 
 def main(*, stage: Stage = None, port: int = None):
+
     if stage is None:
         try:
             stage = Stage(get_env(key="STAGE"))
         except (KeyError, ValueError):
             stage = Stage.PRODUCTION
+
+    print(stage)
 
     if port is None:
         try:
