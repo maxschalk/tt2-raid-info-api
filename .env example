@@ -1,4 +1,6 @@
-STAGE=dev|staging|prod
+STAGE=dev|prod
+PORT=5000
+
 TT2_RAID_API_KEY=privatekey
 
 MONGO_URL=mongoinstance

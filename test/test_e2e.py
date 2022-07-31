@@ -26,13 +26,13 @@ from src.utils.sort_order import SortOrder
 
 # UTILS
 
-PORT = 5000
+PORT = 6000
 
-ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
+TT2_RAID_API_KEY = get_env(key='TT2_RAID_API_KEY')
 
 BASE_URL = f"http://localhost:{PORT}/api/v0"
 
-HEADERS = {'secret': ENV_AUTH_SECRET}
+HEADERS = {'secret': TT2_RAID_API_KEY}
 
 
 def make_request_sync(*,
@@ -56,10 +56,10 @@ def make_request_sync(*,
         return response.text
 
 
-async def make_request_async(*, method, path, data=None, response_json=False):
+async def make_request_async(*, method, path, data=None, parse_response=False):
 
     async with method(url=f"{BASE_URL}/{path}", data=data) as response:
-        if response_json:
+        if parse_response:
             return await response.json()
 
         return response
@@ -69,7 +69,7 @@ async def make_requests_async(paths):
     async with aiohttp.ClientSession() as session:
         return await asyncio.gather(*map(
             lambda p: make_request_async(
-                method=session.get, path=p, response_json=True), paths))
+                method=session.get, path=p, parse_response=True), paths))
 
 
 class Server(uvicorn.Server):

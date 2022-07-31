@@ -14,14 +14,14 @@ from src.utils.responses import RESPONSE_STANDARD_NOT_FOUND
 from src.utils.sort_order import SortOrder
 from src.utils.stream_response import create_stream_response
 
-ENV_AUTH_SECRET = get_env(key='AUTH_SECRET')
+TT2_RAID_API_KEY = get_env(key='TT2_RAID_API_KEY')
 # ENV_STAGE = get_env('STAGE')
 
 DISPLAY_IN_DOCS = True  # ENV_STAGE != Stage.PRODUCTION.value if ENV_STAGE else False
 
 
 def _verify_authorization(*, secret: Optional[str]):
-    if not secret or secret != ENV_AUTH_SECRET:
+    if not secret or secret != TT2_RAID_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You are not authorized to make this request.")
