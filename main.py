@@ -1,6 +1,7 @@
 import sys
 
-from src.app.main import app as server
+from src.app.main import create_app
+from src.domain.mongo_seed_data_repository import MongoSeedDataRepository
 from src.stage import Stage
 from src.utils.get_env import get_env
 
@@ -45,6 +46,21 @@ def main(*, stage: Stage = None, port: int = None):
         except (KeyError, ValueError):
             port = 5000
 
+    seed_data_repo = MongoSeedDataRepository(
+        url=get_env(key="MONGO_URL"),
+        username=get_env(key="MONGO_USERNAME"),
+        password=get_env(key="MONGO_PASSWORD"),
+        db_name=get_env(key="MONGO_DB_NAME"),
+        coll_name=get_env(key="MONGO_COLLECTION_NAME"),
+    )
+
+    if stage == Stage.DEV:
+        import uvicorn
+
+        app = create_app(stage=stage, seed_data_repo=seed_data_repo)
+
+        uvicorn.run(app=app, host=HOST, port=port)
+
     if stage == Stage.PRODUCTION:
         try:
             options = {
@@ -52,17 +68,13 @@ def main(*, stage: Stage = None, port: int = None):
                 "workers": 4,
                 "worker_class": "uvicorn.workers.UvicornWorker",
             }
-            StandaloneGunicornApplication(server, options).run()
+
+            app = create_app(stage=stage, seed_data_repo=seed_data_repo)
+            StandaloneGunicornApplication(app=app, options=options).run()
 
         except ModuleNotFoundError:
-            print(f"Trying to run PROD on {sys.platform}, defaulting to DEV",
+            print(f"Trying to run PROD on {sys.platform}, aborted",
                   file=sys.stderr)
-            stage = Stage.DEV
-
-    if stage == Stage.DEV:
-        import uvicorn
-
-        uvicorn.run(app=server, host=HOST, port=port)
 
 
 if __name__ == "__main__":

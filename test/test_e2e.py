@@ -4,6 +4,7 @@ import json
 import operator
 import threading
 import time
+import uuid
 from contextlib import suppress
 from http.client import HTTPException
 from test.mocks import mock_raid_seed_raw
@@ -14,10 +15,13 @@ import aiohttp
 import pytest
 import requests
 import uvicorn
+from src.app.main import create_app
+from src.domain.mongo_seed_data_repository import temp_repo
 from src.model.raid_data import (RaidInfoRaw, RaidSeedRaw,
                                  map_to_native_object, map_to_raid_info,
                                  map_to_raid_seed)
 from src.model.seed_type import SeedType
+from src.stage import Stage
 from src.utils import selectors
 from src.utils.get_env import get_env
 from src.utils.sort_order import SortOrder
@@ -96,11 +100,24 @@ BASE_PATH_RAID_INFO = "raid_info"
 
 @pytest.fixture(scope="module", autouse=True)
 def server():
-    config = uvicorn.Config("src.app.main:app", host="0.0.0.0", port=PORT)
-    server = Server(config=config)
 
-    with server.run_in_thread():
-        yield
+    repo_init_kwargs = {
+        "url": get_env(key="MONGO_URL"),
+        "username": get_env(key="MONGO_USERNAME"),
+        "password": get_env(key="MONGO_PASSWORD"),
+        "db_name": str(uuid.uuid4()),
+        "coll_name": "test",
+    }
+
+    with temp_repo(**repo_init_kwargs) as repo:
+
+        app = create_app(stage=Stage.TEST, seed_data_repo=repo)
+
+        config = uvicorn.Config(app=app, host="0.0.0.0", port=PORT)
+        server = Server(config=config)
+
+        with server.run_in_thread():
+            yield
 
 
 @pytest.fixture(scope="module")
@@ -119,10 +136,11 @@ def posted_seeds() -> List[Tuple[str, RaidSeedRaw]]:
         key=lambda t: t[0])
 
     for identifier, seed in seeds_posted:
-        response = make_request_sync(method=requests.post,
-                                     path=f"admin/save/{identifier}",
-                                     data=json.dumps(seed),
-                                     parse_response=False)
+        response = make_request_sync(
+            method=requests.post,
+            path=f"{BASE_PATH_ADMIN}/save/{identifier}",
+            data=json.dumps(seed),
+            parse_response=False)
 
         assert response.status_code == 201
 
@@ -130,9 +148,10 @@ def posted_seeds() -> List[Tuple[str, RaidSeedRaw]]:
 
     for identifier, seed in seeds_posted:
         with suppress(HTTPException):
-            response = make_request_sync(method=requests.delete,
-                                         path=f"admin/delete/{identifier}",
-                                         parse_response=False)
+            response = make_request_sync(
+                method=requests.delete,
+                path=f"{BASE_PATH_ADMIN}/delete/{identifier}",
+                parse_response=False)
 
 
 # TEST ADMIN
