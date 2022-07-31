@@ -1,3 +1,5 @@
+from typing import Callable
+
 from fastapi import APIRouter, HTTPException, status
 from src.domain.seed_data_repository import SeedDataRepository
 from src.model.raid_data import RaidInfo, map_to_native_object
@@ -5,7 +7,9 @@ from src.model.seed_type import SeedType
 from src.utils import selectors
 
 
-def _factory_raid_info_by_tier_level(*, repo: SeedDataRepository):
+def _factory_raid_info_by_tier_level(*, repo: SeedDataRepository,
+                                     selectors_utils,
+                                     map_to_native_object_func: Callable):
 
     async def raid_info_by_tier_level(seed_type: SeedType,
                                       tier: int,
@@ -21,12 +25,12 @@ def _factory_raid_info_by_tier_level(*, repo: SeedDataRepository):
                 detail=f"No raid seed found for {offset_weeks=}")
 
         selectors_and_validators = (
-            (selectors.raid_tier, lambda x: x == tier),
-            (selectors.raid_level, lambda x: x == level),
+            (selectors_utils.raid_tier, lambda x: x == tier),
+            (selectors_utils.raid_level, lambda x: x == level),
         )
 
-        payload = selectors.select_first_by(
-            data=map_to_native_object(data=seed_data),
+        payload = selectors_utils.select_first_by(
+            data=map_to_native_object_func(data=seed_data),
             selectors_and_validators=selectors_and_validators,
         )
 
@@ -50,7 +54,10 @@ def create_router(seed_data_repo: SeedDataRepository):
     router.add_api_route(
         path="/{seed_type}/{tier}/{level}",
         methods=["get"],
-        endpoint=_factory_raid_info_by_tier_level(repo=seed_data_repo),
+        endpoint=_factory_raid_info_by_tier_level(
+            repo=seed_data_repo,
+            selectors_utils=selectors,
+            map_to_native_object_func=map_to_native_object),
         summary="Individual raid level info",
         description="Select the data for a single raid level by tier and level"
     )
