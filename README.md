@@ -34,19 +34,28 @@ It provides data to the [TT2 Raid Info Client](https://github.com/riskypenguin/t
 
 ## Usage
 
-You can run the development version of the project locally:
+You can run the project locally via `./main.py`:
+
+```python
+python main.py
+```
+
+It tries to get `STAGE` (development / production) from the environment. Production is assumed as a default.
+Note that production requires linux as `gunicorn` is not available on Windows.
+
+You can also run the local versions directly / manually.
+
+Dev:
 
 ```bash
 uvicorn src.app.main:app --host 0.0.0.0 --port 5000 --reload
 ```
 
-You can run the production version of the project locally:
+Prod:
 
 ```bash
 gunicorn src.app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:80
 ```
-
-You can also use the provided scripts `run_dev` and `run_prod` in the [scripts directory](/scripts/). Note that the scripts expect a virtual environment to exist at `project_root/venv` and might fail otherwise.
 
 ## Project status & Roadmap
 
