@@ -15,7 +15,7 @@ def create_router(seed_data_repo: SeedDataRepository):
     router.include_router(v0.create_router(seed_data_repo=seed_data_repo))
 
     @router.get("/", include_in_schema=False)
-    async def welcome():
+    async def root():
         return {
             "message":
             "Welcome to the TT2 Raid Seed API! You can find the docs at /docs."
