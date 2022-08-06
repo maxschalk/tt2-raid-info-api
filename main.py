@@ -68,7 +68,7 @@ def main(*, stage: Stage = None, port: int = None):
         try:
             options = {
                 "bind": f"{HOST}:{port}",
-                "workers": 4,
+                "workers": 1,
                 "worker_class": "uvicorn.workers.UvicornWorker",
             }
 
