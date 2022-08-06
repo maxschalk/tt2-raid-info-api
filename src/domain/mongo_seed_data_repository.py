@@ -2,6 +2,7 @@ import contextlib
 from typing import Literal, Optional, Tuple, Union
 
 import pymongo
+from cachetools import TTLCache, cached
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from src.domain.seed_data_repository import (SeedDataRepository,
@@ -11,6 +12,8 @@ from src.model.raid_data import (RaidSeed, is_of_seed_type,
                                  map_to_native_object, map_to_raid_seed)
 from src.model.seed_type import SeedType
 from src.utils.sort_order import SortOrder
+
+_CACHE = TTLCache(maxsize=32, ttl=600)
 
 
 def _map_pymongo_sort_order(
@@ -58,6 +61,7 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         self._disconnect()
 
+    @cached(_CACHE)
     def list_seed_identifiers(
             self,
             *,
@@ -73,6 +77,7 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         return tuple(map(lambda r: r['identifier'], records))
 
+    @cached(_CACHE)
     def get_seed_identifier_by_week_offset(
             self,
             *,
@@ -91,6 +96,7 @@ class MongoSeedDataRepository(SeedDataRepository):
         except IndexError:
             return None
 
+    @cached(_CACHE)
     def list_seeds(
             self,
             *,
@@ -109,6 +115,7 @@ class MongoSeedDataRepository(SeedDataRepository):
                 lambda r: map_to_raid_seed(data=r["data"], seed_type=seed_type
                                            ), records))
 
+    @cached(_CACHE)
     def get_seed_by_identifier(
             self,
             *,
@@ -191,6 +198,8 @@ class MongoSeedDataRepository(SeedDataRepository):
                         data=data,
                         _duplicate_ok=_duplicate_ok)
 
+        _CACHE.clear()
+
     def save_seeds(self,
                    *,
                    items: Tuple[Tuple[str, SeedType, RaidSeed]],
@@ -210,6 +219,8 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         with self._client.start_session() as session:
             session.with_transaction(callback=callback)
+
+        _CACHE.clear()
 
     def _delete_seed(self,
                      *,
@@ -241,6 +252,8 @@ class MongoSeedDataRepository(SeedDataRepository):
                           seed_type=seed_type,
                           _notfound_ok=_notfound_ok)
 
+        _CACHE.clear()
+
     def delete_seeds(self,
                      *,
                      items: Tuple[Tuple[str, SeedType]],
@@ -259,6 +272,8 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         with self._client.start_session() as session:
             session.with_transaction(callback=callback)
+
+        _CACHE.clear()
 
 
 @contextlib.contextmanager
