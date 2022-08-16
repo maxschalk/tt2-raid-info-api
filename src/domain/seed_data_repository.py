@@ -77,3 +77,7 @@ class SeedDataRepository(ABC):
     @abstractmethod
     def delete_seeds(self, *, items: Tuple[Tuple[str, SeedType]]) -> None:
         pass
+
+    @abstractmethod
+    def delete_seeds_older_than(self, *, days: int) -> None:
+        pass

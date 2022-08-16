@@ -12,7 +12,8 @@ def test_routes_exist():
         '/api/v0/admin/seed_identifiers/{seed_type}',
         '/api/v0/admin/seed/{seed_type}/{identifier}', '/api/v0/admin/enhance',
         '/api/v0/admin/save/{identifier}', '/api/v0/admin/delete/{identifier}',
-        '/api/v0/seeds/{seed_type}', '/api/v0/seeds/{seed_type}/recent',
+        '/api/v0/admin/delete_old', '/api/v0/seeds/{seed_type}',
+        '/api/v0/seeds/{seed_type}/recent',
         '/api/v0/raid_info/{seed_type}/{tier}/{level}'
     }
 

@@ -141,6 +141,27 @@ def _factory_delete_seed(*, repo: SeedDataRepository):
     return delete_seed
 
 
+def _factory_delete_old_seeds(*, repo: SeedDataRepository):
+
+    async def delete_old_seeds(*,
+                               days: int = 14,
+                               secret: Optional[str] = Header(None)) -> Dict:
+        _verify_authorization(secret=secret)
+
+        try:
+            repo.delete_seeds_older_than(days=days)
+        except Exception as err:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(err)) from err
+
+        return {
+            "detail": f"Deleted all seeds older than {days} days",
+        }
+
+    return delete_old_seeds
+
+
 def create_router(seed_data_repo: SeedDataRepository):
 
     router = APIRouter(
@@ -183,5 +204,11 @@ def create_router(seed_data_repo: SeedDataRepository):
                          methods=["delete"],
                          endpoint=_factory_delete_seed(repo=seed_data_repo),
                          include_in_schema=DISPLAY_IN_DOCS)
+
+    router.add_api_route(
+        path="/delete_old",
+        methods=["delete"],
+        endpoint=_factory_delete_old_seeds(repo=seed_data_repo),
+        include_in_schema=DISPLAY_IN_DOCS)
 
     return router

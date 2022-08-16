@@ -1,5 +1,6 @@
 import uuid
-from itertools import zip_longest
+from datetime import datetime, timedelta
+from itertools import cycle, zip_longest
 from test.mocks import (mock_raid_info_enhanced, mock_raid_info_raw,
                         mock_raid_seed_enhanced, mock_raid_seed_raw,
                         mock_seed_identifier)
@@ -587,3 +588,85 @@ class TestDeleteSeed:
                                                      seed_type=seed_type)
 
             assert saved_seed is not None
+
+
+class TestDeleteOldSeeds:
+
+    @staticmethod
+    @pytest.fixture(scope="module")
+    def repo() -> MongoSeedDataRepository:
+        with temp_repo(**_REPO_INIT_KWARGS) as repo:
+            yield repo
+
+    today = datetime.now().date()
+
+    _ids = (
+        f"raid_seed_{today.strftime('%Y%m%d')}",
+        f"raid_seed_{(today - timedelta(days=7)).strftime('%Y%m%d')}",
+        f"raid_seed_{(today - timedelta(days=14)).strftime('%Y%m%d')}",
+        f"raid_seed_{(today - timedelta(days=21)).strftime('%Y%m%d')}",
+    )
+
+    _seeds = (
+        *(mock_raid_seed_raw() for _ in range(4)),
+        *(mock_raid_seed_enhanced() for _ in range(4)),
+    )
+
+    _seed_types = (
+        *(SeedType.RAW for _ in range(4)),
+        *(SeedType.ENHANCED for _ in range(4)),
+    )
+
+    items = tuple(zip(cycle(_ids), _seed_types, _seeds))
+
+    @pytest.fixture(autouse=True)
+    def seeds(self, repo: MongoSeedDataRepository) -> Tuple[RaidSeed]:
+
+        repo.save_seeds(items=self.items, _duplicate_ok=True)
+
+        try:
+            yield
+        finally:
+            items = zip(self._ids, self._seed_types)
+            repo.delete_seeds(items=items, _notfound_ok=True)
+
+    def test_none_found(self, repo: MongoSeedDataRepository):
+        print(repo.list_seed_identifiers())
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+        repo.delete_seeds_older_than(days=22)
+
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+    def test_none_older_than_oldest(self, repo: MongoSeedDataRepository):
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+        repo.delete_seeds_older_than(days=21)
+
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+    def test_individual_success(self, repo: MongoSeedDataRepository):
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+        repo.delete_seeds_older_than(days=20)
+
+        assert set(repo.list_seed_identifiers()) == set(self._ids[:3])
+
+        repo.delete_seeds_older_than(days=13)
+
+        assert set(repo.list_seed_identifiers()) == set(self._ids[:2])
+
+        repo.delete_seeds_older_than(days=6)
+
+        assert set(repo.list_seed_identifiers()) == set(self._ids[:1])
+
+        repo.delete_seeds_older_than(days=-1)
+
+        assert len(repo.list_seed_identifiers()) == 0
+
+    def test_all_success(self, repo: MongoSeedDataRepository):
+        assert set(repo.list_seed_identifiers()) == set(self._ids)
+
+        repo.delete_seeds_older_than(days=-1)
+
+        assert len(repo.list_seed_identifiers()) == 0

@@ -1,5 +1,8 @@
 import contextlib
-from typing import Literal, Optional, Tuple, Union
+import re
+from datetime import datetime, timedelta
+from typing import (Callable, Generator, Iterable, Literal, Optional, Tuple,
+                    Union)
 
 import pymongo
 from cachetools import TTLCache, cached
@@ -25,6 +28,30 @@ def _map_pymongo_sort_order(
         return pymongo.DESCENDING
 
     return None
+
+
+def filter_by_key(predicate: Callable, iterable: Iterable,
+                  key_func: Callable) -> Generator:
+    for value in iterable:
+        if predicate(key_func(value)):
+            yield value
+
+
+def get_ids_older_than(ids: Iterable[str], days: int) -> Tuple[str]:
+
+    def key_func(seed_id: str) -> datetime.date:
+        date_str = re.search(r"\d+", seed_id).group()
+        date = datetime.strptime(date_str, "%Y%m%d").date()
+
+        return date
+
+    cutoff = (datetime.now() - timedelta(days=days)).date()
+
+    ids_older = filter_by_key(predicate=lambda d: d < cutoff,
+                              iterable=ids,
+                              key_func=key_func)
+
+    return tuple(ids_older)
 
 
 class MongoSeedDataRepository(SeedDataRepository):
@@ -61,7 +88,6 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         self._disconnect()
 
-    @cached(_CACHE)
     def list_seed_identifiers(
             self,
             *,
@@ -77,7 +103,6 @@ class MongoSeedDataRepository(SeedDataRepository):
 
         return tuple(map(lambda r: r['identifier'], records))
 
-    @cached(_CACHE)
     def get_seed_identifier_by_week_offset(
             self,
             *,
@@ -274,6 +299,16 @@ class MongoSeedDataRepository(SeedDataRepository):
             session.with_transaction(callback=callback)
 
         _CACHE.clear()
+
+    def delete_seeds_older_than(self, *, days: int) -> None:
+
+        ids = set(self.list_seed_identifiers())
+        to_delete = get_ids_older_than(ids, days)
+
+        items = (*((seed_id, SeedType.RAW) for seed_id in to_delete),
+                 *((seed_id, SeedType.ENHANCED) for seed_id in to_delete))
+
+        self.delete_seeds(items=items)
 
 
 @contextlib.contextmanager
