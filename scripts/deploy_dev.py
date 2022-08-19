@@ -9,7 +9,7 @@ def stashed_changes():
     try:
         yield
     finally:
-        subprocess.run(("git", "stash", "apply"), check=False)
+        subprocess.run(("git", "stash", "pop"), check=False)
 
 
 @contextlib.contextmanager
