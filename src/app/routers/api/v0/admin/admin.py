@@ -174,6 +174,7 @@ def create_router(seed_data_repo: SeedDataRepository):
         path="/seed_identifiers/{seed_type}",
         methods=["get"],
         endpoint=_factory_list_seed_identifiers(repo=seed_data_repo),
+        name="List seed identifiers by seed type",
         include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(
@@ -182,6 +183,7 @@ def create_router(seed_data_repo: SeedDataRepository):
         endpoint=_factory_download_seed_file(
             repo=seed_data_repo,
             create_stream_response_func=create_stream_response),
+        name="Download seed file by seed identifier",
         include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(
@@ -190,6 +192,7 @@ def create_router(seed_data_repo: SeedDataRepository):
         endpoint=_factory_enhance_seed(
             enhance_seed_data_func=enhance_seed_data,
             create_stream_response_func=create_stream_response),
+        name="Enhance custom seed data",
         include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(path="/save/{identifier}",
@@ -198,17 +201,20 @@ def create_router(seed_data_repo: SeedDataRepository):
                          endpoint=_factory_save_seed(
                              repo=seed_data_repo,
                              enhance_seed_data_func=enhance_seed_data),
+                         name="Authenticated: Save a new raw seed",
                          include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(path="/delete/{identifier}",
                          methods=["delete"],
                          endpoint=_factory_delete_seed(repo=seed_data_repo),
+                         name="Authenticated: Delete seeds by identifier",
                          include_in_schema=DISPLAY_IN_DOCS)
 
     router.add_api_route(
         path="/delete_old",
         methods=["delete"],
         endpoint=_factory_delete_old_seeds(repo=seed_data_repo),
+        name="Authenticated: Delete all seeds older than given days",
         include_in_schema=DISPLAY_IN_DOCS)
 
     return router
