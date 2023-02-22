@@ -102,7 +102,7 @@ def _factory_save_seed(*, repo: SeedDataRepository,
             repo.save_seeds(items=payload)
         except SeedDuplicateError as err:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_409_CONFLICT,
                 detail=f"Seed {identifier} already exists") from err
 
         return {
