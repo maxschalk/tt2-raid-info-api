@@ -2,6 +2,7 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 from fastapi import APIRouter, Header, HTTPException, status
 from fastapi.responses import StreamingResponse
+
 from src.domain.seed_data_repository import (SeedDataRepository,
                                              SeedDuplicateError,
                                              SeedNotFoundError)
@@ -100,8 +101,9 @@ def _factory_save_seed(*, repo: SeedDataRepository,
         try:
             repo.save_seeds(items=payload)
         except SeedDuplicateError as err:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=str(err)) from err
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Seed {identifier} already exists") from err
 
         return {
             "detail": (f"Saved seeds {identifier}.{SeedType.RAW.value} "
